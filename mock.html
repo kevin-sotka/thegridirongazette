@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="TGGlogo.png">
+    <title>AI Mock Draft Streamer - User Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" 
+            onload="console.log('Supabase CDN script: raw onload event fired.'); window.triggerSupabaseLibraryPoll();"
+            onerror="console.error('Supabase CDN script: onerror event fired. Failed to load.'); window.supabaseClientLoaded = false; document.dispatchEvent(new Event('supabaseLoadError'));">
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .draft-board-container { 
+            width: 100%;
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            padding-bottom: 10px; 
+        }
+        .draft-board-grid {
+            display: flex; 
+            gap: 4px;
+            width: fit-content; 
+        }
+        .team-col {
+            background-color: #1f2937; /* bg-gray-800 */
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 150px; 
+            flex-shrink: 0; 
+            transition: background-color 0.3s ease; 
+        }
+        .user-controlled-team-col-bg { 
+            background-color: #3730a3; /* bg-indigo-800 */
+        }
+        .team-header {
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #374151; 
+            font-size: 0.8rem; 
+            min-height: 5.5em; 
+            line-height: 1.2; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around; 
+            align-items: center; 
+        }
+        .team-control-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
+        }
+        .team-control-container input[type="radio"] {
+            margin-right: 4px;
+            transform: scale(0.8);
+        }
+        .team-name-display { 
+             display: block;
+             margin-bottom: 4px; 
+             font-size: 0.9rem; 
+        }
+        .strategy-select {
+            background-color: #374151; 
+            color: #e5e7eb; 
+            border: 1px solid #4b5563; 
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 0.7rem;
+            width: 95%; 
+            -webkit-appearance: none; 
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239CA3AF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            background-size: 8px 10px;
+        }
+        .strategy-select:disabled {
+            opacity: 0.7;
+            background-image: none; 
+        }
+        .pick-cell {
+            background-color: #374151; 
+            color: white;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .pick-cell.empty {
+            background-color: #4b5563; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-name { font-weight: bold; }
+        .player-info { font-size: 0.65rem; color: #d1d5db; }
+        .rookie-tag { 
+            color: #f59e0b; 
+            font-weight: bold;
+            font-size: 0.6rem;
+            margin-left: 4px;
+        }
+        .available-players-container {
+            max-height: 400px; 
+            overflow-y: auto;
+            border: 1px solid #374151; 
+            border-radius: 4px;
+        }
+        .player-row { 
+            padding: 0.375rem 0.5rem; 
+            border-radius: 0.25rem; 
+            cursor: pointer;
+            border-bottom: 1px solid #374151; 
+        }
+        .player-row:last-child {
+            border-bottom: none;
+        }
+        .player-row:hover {
+            background-color: #2b3646; 
+        }
+        .player-row.selected-for-draft {
+            background-color: #1d4ed8; 
+            color: white;
+        }
+        .on-the-clock {
+            border: 2px solid #fbbf24; 
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        .status-message {
+            min-height: 24px; 
+        }
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85); display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 9999;
+            color: white; font-size: 1.5rem; text-align: center;
+        }
+        #aiThoughtProcessBox {
+            background-color: #1f2937; border: 1px solid #374151; 
+            border-radius: 8px; padding: 12px; margin-bottom: 1rem; 
+            min-height: 100px; font-size: 0.875rem; color: #e5e7eb; 
+            white-space: pre-wrap; 
+        }
+        .action-button { 
+            margin-top: 0.5rem; padding: 0.5rem 1rem;
+            background-color: #2563eb; color: white;
+            border-radius: 4px; cursor: pointer; border: none;
+        }
+        .action-button:hover { background-color: #1d4ed8; }
+        .action-button:disabled { background-color: #4b5563; cursor: not-allowed; }
+
+        .draft-controls { text-align: center; margin-top: 1rem; margin-bottom: 1rem; }
+        .draft-complete-message { font-size: 1.25rem; color: #34d399; margin-bottom: 0.5rem; }
+        .error-message-bar {
+            background-color: #ef4444; color: white; padding: 0.75rem;
+            border-radius: 4px; margin-bottom: 1rem; text-align: center; font-weight: bold;
+        }
+        .gazette-footer { text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #374151; }
+        .gazette-text { font-size: 1.25rem; color: #9ca3af; margin-bottom: 1rem; }
+        .gazette-image { max-width: 300px; height: auto; margin-left: auto; margin-right: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #pickTimerDisplay { font-size: 1.1rem; color: #facc15; /* yellow-400 */ margin-top: 0.5rem; font-weight: bold; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-100 p-4 md:p-8">
+
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;"> 
+        <p id="loadingStatusText">Initializing...</p>
+    </div>
+
+    <div class="container mx-auto">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-sky-400">The Gridiron Gazette<br>AI Mock Draft Streamer</h1>
+            <p class="text-gray-400 text-sm">Yahoo .5 ppr redraft average draft position as of June 26, 2025</p>
+            <p class="text-gray-400 text-sm md:text-base mt-1">Continuous AI vs. AI Drafts (0.5 PPR, 12 Teams, 1QB, 2RB, 2WR, 1TE, 1Flex, 1DST, 4 Bench)</p>
+            <div id="errorMessageBar" class="error-message-bar" style="display: none;"></div> 
+            <div id="draftStatus" class="mt-2 text-lg text-amber-400 status-message">Loading Player Data...</div> 
+            <div id="currentPickInfo" class="text-sm text-gray-300 status-message"></div>
+            <div id="pickTimerDisplay" class="status-message"></div> 
+            <div id="platformADPStatus" class="text-xs text-gray-500 mt-1 status-message"></div>
+            <div class="mt-4">
+                 <button id="startDraftButton" class="action-button" style="display:none;">Start Draft</button>
+            </div>
+        </header>
+
+        <div id="aiThoughtProcessBox" class="mb-6" style="display: none;"> 
+            AI thought process will appear here...
+        </div>
+
+        <div id="draftControlsTop" class="draft-controls" style="display: none;">
+            <span class="draft-complete-message" style="display: none;">Draft Complete!</span>
+            <button id="resetDraftButtonTop" class="action-button redraft-button">Reset Draft</button>
+        </div>
+
+        <div class="draft-board-container mb-6">
+            <div class="draft-board-grid">
+                </div>
+        </div>
+
+        <div id="draftControlsBottom" class="draft-controls" style="display: none;">
+            <span class="draft-complete-message" style="display: none;">Draft Complete!</span>
+            <button id="resetDraftButtonBottom" class="action-button redraft-button">Reset Draft</button>
+        </div>
+
+
+        <div id="draftViewElements" class="grid grid-cols-1 md:grid-cols-3 gap-6" style="display: none;"> 
+            <div class="md:col-span-2 bg-gray-800 p-4 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-3 text-sky-400">Team Rosters</h2>
+                <div id="teamRosters" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 text-xs">
+                    </div>
+            </div>
+
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-semibold text-sky-400">Available Players (by ADP)</h2>
+                    <button id="draftSelectedPlayerButton" class="action-button text-sm py-1 px-2" style="display:none;">Draft Selected Player</button>
+                </div>
+                <div class="mb-2">
+                    <label for="positionFilter" class="mr-2 text-sm">Filter by Position:</label>
+                    <select id="positionFilter" class="bg-gray-700 text-white rounded p-1 text-sm">
+                        <option value="ALL">All</option>
+                        <option value="QB">QB</option>
+                        <option value="RB">RB</option>
+                        <option value="WR">WR</option>
+                        <option value="TE">TE</option>
+                        <option value="DST">D/ST</option>
+                    </select>
+                </div>
+                <div id="availablePlayers" class="available-players-container text-xs space-y-1">
+                    </div>
+            </div>
+        </div>
+         <footer class="text-center mt-8 text-xs text-gray-500">
+            <p>Draft data stored in Supabase. Platform ADP is continuously updated.</p>
+            <p>Production Version 1.0.24</p> 
+        </footer>
+
+        <div class="gazette-footer">
+            <p class="gazette-text">Click on image to visit The Gridiron Gazette fantasy football news page</p>
+            <a href="https://www.meatbagmade.com/thegridirongazette/index.html" target="_blank" rel="noopener noreferrer">
+                <img src="TheGridironGazetteLogo.png" 
+                     alt="The Gridiron Gazette Logo" 
+                     class="gazette-image"
+                     onerror="this.onerror=null; this.src='https://placehold.co/300x100/cccccc/333333?text=Logo+Not+Found';">
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        window.supabaseClientLoaded = false; 
+        let supabaseLibraryPollInterval;
+        let supabasePollAttempts = 0;
+        const MAX_SUPABASE_POLL_ATTEMPTS = 20; 
+
+        window.triggerSupabaseLibraryPoll = function() {
+            if (supabaseLibraryPollInterval) clearInterval(supabaseLibraryPollInterval); 
+            supabaseLibraryPollInterval = setInterval(() => {
+                supabasePollAttempts++;
+                if (typeof window.supabaseJs === 'object' && typeof window.supabaseJs.createClient === 'function') {
+                    clearInterval(supabaseLibraryPollInterval);
+                    console.log('Supabase library (supabaseJs) confirmed available via polling.');
+                    window.supabaseClientLoaded = true; 
+                    document.dispatchEvent(new CustomEvent('supabaseLibraryReady')); 
+                } else if (supabasePollAttempts >= MAX_SUPABASE_POLL_ATTEMPTS) {
+                    clearInterval(supabaseLibraryPollInterval);
+                    console.error('Supabase library (supabaseJs) did NOT become available after polling.');
+                    window.supabaseClientLoaded = false;
+                    document.dispatchEvent(new CustomEvent('supabaseLibraryFailed')); 
+                }
+            }, 250); 
+        }
+    </script>
+
+    <script type="module">
+        // --- SUPABASE SETUP ---
+        const SUPABASE_URL = 'https://qjhdubplvhkvzjnliosf.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqaGR1YnBsdmhrdnpqbmxpb3NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMTMyOTIsImV4cCI6MjA2MzU4OTI5Mn0.quTiY-cieSBzcLX3bK-jn9dZLg6Sy_vn0z47iavPbK0';
+
+        let supabase;
+        let supabaseInitialized = false; 
+        
+        function createSupabaseClientInstance() {
+            if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL' || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                console.warn("Supabase URL or Anon Key is placeholder. DB features will be skipped.");
+                supabaseInitialized = false;
+                return null; 
+            }
+            try {
+                const client = window.supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Supabase client instance created successfully.");
+                supabaseInitialized = true;
+                hideGlobalError(); 
+                return client;
+            } catch (error) {
+                console.error("Supabase client creation error:", error.message);
+                displayGlobalError(`Supabase client creation error: ${error.message}. Check URL/Key.`);
+                supabaseInitialized = false;
+                return null; 
+            }
+        }
+        
+        // --- HARDCODED ADP DATA ---
+        const hardcodedRawAdpArray = [
+             { rank: 1, player: "Ja'Marr Chase", team: "CIN", bye: 10, pos: "WR1", avg: 1 },
+            { rank: 2, player: "Bijan Robinson", team: "ATL", bye: 5, pos: "RB1", avg: 2.5 },
+            { rank: 3, player: "Justin Jefferson", team: "MIN", bye: 6, pos: "WR2", avg: 3 },
+            { rank: 4, player: "Saquon Barkley", team: "PHI", bye: 9, pos: "RB2", avg: 3.5 },
+            { rank: 5, player: "CeeDee Lamb", team: "DAL", bye: 10, pos: "WR3", avg: 5.5 },
+            { rank: 6, player: "Jahmyr Gibbs", team: "DET", bye: 8, pos: "RB3", avg: 5.5 },
+            { rank: 7, player: "Malik Nabers", team: "NYG", bye: 14, pos: "WR4", avg: 8 },
+            { rank: 8, player: "Puka Nacua", team: "LAR", bye: 8, pos: "WR5", avg: 9 },
+            { rank: 9, player: "Ashton Jeanty", team: "LV", bye: 8, pos: "RB4", avg: 9.5 },
+            { rank: 10, player: "Amon-Ra St. Brown", team: "DET", bye: 8, pos: "WR6", avg: 9.5 },
+            { rank: 11, player: "Nico Collins", team: "HOU", bye: 6, pos: "WR7", avg: 11 },
+            { rank: 12, player: "Christian McCaffrey", team: "SF", bye: 14, pos: "RB5", avg: 11.5 },
+            { rank: 13, player: "Derrick Henry", team: "BAL", bye: 7, pos: "RB6", avg: 13 },
+            { rank: 14, player: "Brian Thomas Jr.", team: "JAC", bye: 8, pos: "WR8", avg: 13 },
+            { rank: 15, player: "Drake London", team: "ATL", bye: 5, pos: "WR9", avg: 15 },
+            { rank: 16, player: "De'Von Achane", team: "MIA", bye: 12, pos: "RB7", avg: 15.5 },
+            { rank: 17, player: "A.J. Brown", team: "PHI", bye: 9, pos: "WR10", avg: 17.5 },
+            { rank: 18, player: "Brock Bowers", team: "LV", bye: 8, pos: "TE1", avg: 18 },
+            { rank: 19, player: "Ladd McConkey", team: "LAC", bye: 12, pos: "WR11", avg: 19 },
+            { rank: 20, player: "Jonathan Taylor", team: "IND", bye: 11, pos: "RB8", avg: 20 },
+            { rank: 21, player: "Bucky Irving", team: "TB", bye: 9, pos: "RB9", avg: 23 },
+            { rank: 22, player: "Tee Higgins", team: "CIN", bye: 10, pos: "WR12", avg: 24.5 },
+            { rank: 23, player: "Josh Jacobs", team: "GB", bye: 5, pos: "RB10", avg: 25 },
+            { rank: 24, player: "Trey McBride", team: "ARI", bye: 8, pos: "TE2", avg: 25 },
+            { rank: 25, player: "Garrett Wilson", team: "NYJ", bye: 9, pos: "WR13", avg: 25.5 },
+            { rank: 26, player: "Jaxon Smith-Njigba", team: "SEA", bye: 8, pos: "WR14", avg: 26.5 },
+            { rank: 27, player: "Chase Brown", team: "CIN", bye: 10, pos: "RB11", avg: 28.5 },
+            { rank: 28, player: "Lamar Jackson", team: "BAL", bye: 7, pos: "QB1", avg: 30 },
+            { rank: 29, player: "Rashee Rice", team: "KC", bye: 10, pos: "WR15", avg: 30.5 },
+            { rank: 30, player: "Josh Allen", team: "BUF", bye: 7, pos: "QB2", avg: 30.5 },
+            { rank: 31, player: "Davante Adams", team: "LAR", bye: 8, pos: "WR16", avg: 31 },
+            { rank: 32, player: "Kyren Williams", team: "LAR", bye: 8, pos: "RB12", avg: 31.5 },
+            { rank: 33, player: "Marvin Harrison Jr.", team: "ARI", bye: 8, pos: "WR17", avg: 31.5 },
+            { rank: 34, player: "Tyreek Hill", team: "MIA", bye: 12, pos: "WR18", avg: 32 },
+            { rank: 35, player: "Terry McLaurin", team: "WAS", bye: 12, pos: "WR19", avg: 32.5 },
+            { rank: 36, player: "Breece Hall", team: "NYJ", bye: 9, pos: "RB13", avg: 33 },
+            { rank: 37, player: "Jayden Daniels", team: "WAS", bye: 12, pos: "QB3", avg: 35.5 },
+            { rank: 38, player: "Mike Evans", team: "TB", bye: 9, pos: "WR20", avg: 36.5 },
+            { rank: 39, player: "James Cook", team: "BUF", bye: 7, pos: "RB14", avg: 41.5 },
+            { rank: 40, player: "DJ Moore", team: "CHI", bye: 5, pos: "WR21", avg: 42 },
+            { rank: 41, player: "Jalen Hurts", team: "PHI", bye: 9, pos: "QB4", avg: 43 },
+            { rank: 42, player: "George Kittle", team: "SF", bye: 14, pos: "TE3", avg: 43 },
+            { rank: 43, player: "Xavier Worthy", team: "KC", bye: 10, pos: "WR22", avg: 43.5 },
+            { rank: 44, player: "Tetairoa McMillan", team: "CAR", bye: 14, pos: "WR23", avg: 46.5 },
+            { rank: 45, player: "Kenneth Walker III", team: "SEA", bye: 8, pos: "RB15", avg: 47.5 },
+            { rank: 46, player: "Omarion Hampton", team: "LAC", bye: 12, pos: "RB16", avg: 47.5 },
+            { rank: 47, player: "Jameson Williams", team: "DET", bye: 8, pos: "WR24", avg: 48 },
+            { rank: 48, player: "DK Metcalf", team: "PIT", bye: 5, pos: "WR25", avg: 48 },
+            { rank: 49, player: "Joe Burrow", team: "CIN", bye: 10, pos: "QB5", avg: 48.5 },
+            { rank: 50, player: "DeVonta Smith", team: "PHI", bye: 9, pos: "WR26", avg: 48.5 },
+            { rank: 51, player: "Courtland Sutton", team: "DEN", bye: 12, pos: "WR27", avg: 48.5 },
+            { rank: 52, player: "Alvin Kamara", team: "NO", bye: 11, pos: "RB17", avg: 49 },
+            { rank: 53, player: "Chuba Hubbard", team: "CAR", bye: 14, pos: "RB18", avg: 52.5 },
+            { rank: 54, player: "Zay Flowers", team: "BAL", bye: 7, pos: "WR28", avg: 53 },
+            { rank: 55, player: "Joe Mixon", team: "HOU", bye: 6, pos: "RB19", avg: 54 },
+            { rank: 56, player: "James Conner", team: "ARI", bye: 8, pos: "RB20", avg: 59 },
+            { rank: 57, player: "George Pickens", team: "DAL", bye: 10, pos: "WR29", avg: 59.5 },
+            { rank: 58, player: "Chris Godwin", team: "TB", bye: 9, pos: "WR30", avg: 60 },
+            { rank: 59, player: "Jaylen Waddle", team: "MIA", bye: 12, pos: "WR31", avg: 61 },
+            { rank: 60, player: "TreVeyon Henderson", team: "NE", bye: 14, pos: "RB21", avg: 61.5 },
+            { rank: 61, player: "RJ Harvey", team: "DEN", bye: 12, pos: "RB22", avg: 62.5 },
+            { rank: 62, player: "Jauan Jennings", team: "SF", bye: 14, pos: "WR32", avg: 63 },
+            { rank: 63, player: "Jerry Jeudy", team: "CLE", bye: 9, pos: "WR33", avg: 63.5 },
+            { rank: 64, player: "Travis Hunter", team: "JAC", bye: 8, pos: "WR34", avg: 64.5 },
+            { rank: 65, player: "Calvin Ridley", team: "TEN", bye: 10, pos: "WR35", avg: 66.5 },
+            { rank: 66, player: "David Montgomery", team: "DET", bye: 8, pos: "RB23", avg: 68 },
+            { rank: 67, player: "Chris Olave", team: "NO", bye: 11, pos: "WR36", avg: 68 },
+            { rank: 68, player: "Jordan Addison", team: "MIN", bye: 6, pos: "WR37", avg: 68.5 },
+            { rank: 69, player: "Sam LaPorta", team: "DET", bye: 8, pos: "TE4", avg: 69 },
+            { rank: 70, player: "Rome Odunze", team: "CHI", bye: 5, pos: "WR38", avg: 69 },
+            { rank: 71, player: "Patrick Mahomes II", team: "KC", bye: 10, pos: "QB6", avg: 71 },
+            { rank: 72, player: "Deebo Samuel Sr.", team: "WAS", bye: 12, pos: "WR39", avg: 73.5 },
+            { rank: 73, player: "Quinshon Judkins", team: "CLE", bye: 9, pos: "RB24", avg: 73.5 },
+            { rank: 74, player: "Kaleb Johnson", team: "PIT", bye: 5, pos: "RB25", avg: 74.5 },
+            { rank: 75, player: "Baker Mayfield", team: "TB", bye: 9, pos: "QB7", avg: 75 },
+            { rank: 76, player: "D'Andre Swift", team: "CHI", bye: 5, pos: "RB26", avg: 75 },
+            { rank: 77, player: "Jakobi Meyers", team: "LV", bye: 8, pos: "WR40", avg: 76 },
+            { rank: 78, player: "Aaron Jones Sr.", team: "MIN", bye: 6, pos: "RB27", avg: 76.5 },
+            { rank: 79, player: "Tony Pollard", team: "TEN", bye: 10, pos: "RB28", avg: 78 },
+            { rank: 80, player: "Ricky Pearsall", team: "SF", bye: 14, pos: "WR41", avg: 79 },
+            { rank: 81, player: "Khalil Shakir", team: "BUF", bye: 7, pos: "WR42", avg: 80 },
+            { rank: 82, player: "Isiah Pacheco", team: "KC", bye: 10, pos: "RB29", avg: 81.5 },
+            { rank: 83, player: "T.J. Hockenson", team: "MIN", bye: 6, pos: "TE5", avg: 85 },
+            { rank: 84, player: "Josh Downs", team: "IND", bye: 11, pos: "WR43", avg: 86 },
+            { rank: 85, player: "Bo Nix", team: "DEN", bye: 12, pos: "QB8", avg: 86.5 },
+            { rank: 86, player: "Jayden Reed", team: "GB", bye: 5, pos: "WR44", avg: 87.5 },
+            { rank: 87, player: "Brian Robinson Jr.", team: "WAS", bye: 12, pos: "RB30", avg: 87.5 },
+            { rank: 88, player: "Kyler Murray", team: "ARI", bye: 8, pos: "QB9", avg: 88.5 },
+            { rank: 89, player: "Stefon Diggs", team: "NE", bye: 14, pos: "WR45", avg: 89 },
+            { rank: 90, player: "Travis Kelce", team: "KC", bye: 10, pos: "TE6", avg: 92 },
+            { rank: 91, player: "Jaylen Warren", team: "PIT", bye: 5, pos: "RB31", avg: 92 },
+            { rank: 92, player: "Cooper Kupp", team: "SEA", bye: 8, pos: "WR46", avg: 94 },
+            { rank: 93, player: "Matthew Golden", team: "GB", bye: 5, pos: "WR47", avg: 96.5 },
+            { rank: 94, player: "Justin Fields", team: "NYJ", bye: 9, pos: "QB10", avg: 98 },
+            { rank: 95, player: "Brock Purdy", team: "SF", bye: 14, pos: "QB11", avg: 98 },
+            { rank: 96, player: "Darnell Mooney", team: "ATL", bye: 5, pos: "WR48", avg: 98.5 },
+            { rank: 97, player: "Caleb Williams", team: "CHI", bye: 5, pos: "QB12", avg: 99 },
+            { rank: 98, player: "Brandon Aiyuk", team: "SF", bye: 14, pos: "WR49", avg: 99 },
+            { rank: 99, player: "Najee Harris", team: "LAC", bye: 12, pos: "RB32", avg: 99.5 },
+            { rank: 100, player: "Michael Pittman Jr.", team: "IND", bye: 11, pos: "WR50", avg: 100.5 },
+            { rank: 101, player: "Jared Goff", team: "DET", bye: 8, pos: "QB13", avg: 101 },
+            { rank: 102, player: "Tyrone Tracy Jr.", team: "NYG", bye: 14, pos: "RB33", avg: 101.5 },
+            { rank: 103, player: "Mark Andrews", team: "BAL", bye: 7, pos: "TE7", avg: 102.5 },
+            { rank: 104, player: "Evan Engram", team: "DEN", bye: 12, pos: "TE8", avg: 104.5 },
+            { rank: 105, player: "Jordan Mason", team: "MIN", bye: 6, pos: "RB34", avg: 106 },
+            { rank: 106, player: "Dak Prescott", team: "DAL", bye: 10, pos: "QB14", avg: 106 },
+            { rank: 107, player: "Emeka Egbuka", team: "TB", bye: 9, pos: "WR51", avg: 106 },
+            { rank: 108, player: "Travis Etienne Jr.", team: "JAC", bye: 8, pos: "RB35", avg: 106 },
+            { rank: 109, player: "Jonnu Smith", team: "MIA", bye: 12, pos: "TE9", avg: 107 },
+            { rank: 110, player: "Cam Skattebo", team: "NYG", bye: 14, pos: "RB36", avg: 107.5 },
+            { rank: 111, player: "Zach Charbonnet", team: "SEA", bye: 8, pos: "RB37", avg: 107.5 },
+            { rank: 112, player: "Justin Herbert", team: "LAC", bye: 12, pos: "QB15", avg: 110.5 },
+            { rank: 113, player: "Keon Coleman", team: "BUF", bye: 7, pos: "WR52", avg: 112 },
+            { rank: 114, player: "Rashid Shaheed", team: "NO", bye: 11, pos: "WR53", avg: 115 },
+            { rank: 115, player: "Drake Maye", team: "NE", bye: 14, pos: "QB16", avg: 115.5 },
+            { rank: 116, player: "David Njoku", team: "CLE", bye: 9, pos: "TE10", avg: 116 },
+            { rank: 117, player: "Jordan Love", team: "GB", bye: 5, pos: "QB17", avg: 117 },
+            { rank: 118, player: "Javonte Williams", team: "DAL", bye: 10, pos: "RB38", avg: 120 },
+            { rank: 119, player: "C.J. Stroud", team: "HOU", bye: 6, pos: "QB18", avg: 121 },
+            { rank: 120, player: "J.J. McCarthy", team: "MIN", bye: 6, pos: "QB19", avg: 121 },
+            { rank: 121, player: "Jayden Higgins", team: "HOU", bye: 6, pos: "WR54", avg: 121.5 },
+            { rank: 122, player: "Rhamondre Stevenson", team: "NE", bye: 14, pos: "RB39", avg: 121.5 },
+            { rank: 123, player: "Trevor Lawrence", team: "JAC", bye: 8, pos: "QB20", avg: 122.5 },
+            { rank: 124, player: "Rashod Bateman", team: "BAL", bye: 7, pos: "WR55", avg: 123 },
+            { rank: 125, player: "Christian Kirk", team: "HOU", bye: 6, pos: "WR56", avg: 123.5 },
+            { rank: 126, player: "J.K. Dobbins", team: "DEN", bye: 12, pos: "RB40", avg: 124 },
+            { rank: 127, player: "Tyler Warren", team: "IND", bye: 11, pos: "TE11", avg: 124.5 },
+            { rank: 128, player: "Luther Burden III", team: "CHI", bye: 5, pos: "WR57", avg: 126 },
+            { rank: 129, player: "Tyjae Spears", team: "TEN", bye: 10, pos: "RB41", avg: 127 },
+            { rank: 130, player: "Tre Harris", team: "LAC", bye: 12, pos: "WR58", avg: 128 },
+            { rank: 131, player: "Tucker Kraft", team: "GB", bye: 5, pos: "TE12", avg: 129 },
+            { rank: 132, player: "Marvin Mims Jr.", team: "DEN", bye: 12, pos: "WR59", avg: 132 },
+            { rank: 133, player: "Bhayshul Tuten", team: "JAC", bye: 8, pos: "RB42", avg: 132 },
+            { rank: 134, player: "Tua Tagovailoa", team: "MIA", bye: 12, pos: "QB21", avg: 138 },
+            { rank: 135, player: "Michael Penix Jr.", team: "ATL", bye: 5, pos: "QB22", avg: 138 },
+            { rank: 136, player: "Dalton Kincaid", team: "BUF", bye: 7, pos: "TE13", avg: 138.5 },
+            { rank: 137, player: "Rachaad White", team: "TB", bye: 9, pos: "RB43", avg: 138.5 },
+            { rank: 138, player: "Marquise Brown", team: "KC", bye: 10, pos: "WR60", avg: 139 },
+            { rank: 139, player: "Jaydon Blue", team: "DAL", bye: 10, pos: "RB44", avg: 140 },
+            { rank: 140, player: "Dallas Goedert", team: "PHI", bye: 9, pos: "TE14", avg: 140.5 },
+            { rank: 141, player: "Trey Benson", team: "ARI", bye: 8, pos: "RB45", avg: 140.5 },
+            { rank: 142, player: "Colston Loveland", team: "CHI", bye: 5, pos: "TE15", avg: 141 },
+            { rank: 143, player: "Ray Davis", team: "BUF", bye: 7, pos: "RB46", avg: 142 },
+            { rank: 144, player: "Bryce Young", team: "CAR", bye: 14, pos: "QB23", avg: 143 },
+            { rank: 145, player: "Matthew Stafford", team: "LAR", bye: 8, pos: "QB24", avg: 143.5 },
+            { rank: 146, player: "Kyle Williams", team: "NE", bye: 14, pos: "WR61", avg: 144 },
+            { rank: 147, player: "Tank Bigsby", team: "JAC", bye: 8, pos: "RB47", avg: 144 },
+            { rank: 148, player: "Cedric Tillman", team: "CLE", bye: 9, pos: "WR62", avg: 144 },
+            { rank: 149, player: "Isaac Guerendo", team: "SF", bye: 14, pos: "RB48", avg: 145 },
+            { rank: 150, player: "Jake Ferguson", team: "DAL", bye: 10, pos: "TE16", avg: 148 },
+            { rank: 151, player: "Austin Ekeler", team: "WAS", bye: 12, pos: "RB49", avg: 148.5 },
+            { rank: 152, player: "Geno Smith", team: "LV", bye: 8, pos: "QB25", avg: 151.5 },
+            { rank: 153, player: "Isaiah Likely", team: "BAL", bye: 7, pos: "TE17", avg: 152.5 },
+            { rank: 154, player: "Adam Thielen", team: "CAR", bye: 14, pos: "WR63", avg: 153.5 },
+            { rank: 155, player: "Quentin Johnston", team: "LAC", bye: 12, pos: "WR64", avg: 154.5 },
+            { rank: 156, player: "Jalen McMillan", team: "TB", bye: 9, pos: "WR65", avg: 154.5 },
+            { rank: 157, player: "Cameron Ward", team: "TEN", bye: 10, pos: "QB26", avg: 157 },
+            { rank: 158, player: "Kyle Pitts", team: "ATL", bye: 5, pos: "TE18", avg: 158 },
+            { rank: 159, player: "Romeo Doubs", team: "GB", bye: 5, pos: "WR66", avg: 158.5 },
+            { rank: 160, player: "Tyler Allgeier", team: "ATL", bye: 5, pos: "RB50", avg: 162 },
+            { rank: 161, player: "Sam Darnold", team: "SEA", bye: 8, pos: "QB27", avg: 163.5 },
+            { rank: 162, player: "Pat Freiermuth", team: "PIT", bye: 5, pos: "TE19", avg: 164 },
+            { rank: 163, player: "Jack Bech", team: "LV", bye: 8, pos: "WR67", avg: 164 },
+            { rank: 164, player: "Wan'Dale Robinson", team: "NYG", bye: 14, pos: "WR68", avg: 164 },
+            { rank: 165, player: "Jaylen Wright", team: "MIA", bye: 12, pos: "RB51", avg: 165 },
+            { rank: 166, player: "Rico Dowdle", team: "CAR", bye: 14, pos: "RB52", avg: 166 },
+            { rank: 167, player: "Zach Ertz", team: "WAS", bye: 12, pos: "TE20", avg: 168 },
+            { rank: 168, player: "Hunter Henry", team: "NE", bye: 14, pos: "TE21", avg: 169.5 },
+            { rank: 169, player: "Xavier Legette", team: "CAR", bye: 14, pos: "WR69", avg: 169.5 },
+            { rank: 170, player: "Brenton Strange", team: "JAC", bye: 8, pos: "TE22", avg: 171 },
+            { rank: 171, player: "Braelon Allen", team: "NYJ", bye: 9, pos: "RB53", avg: 171 },
+            { rank: 172, player: "Roschon Johnson", team: "CHI", bye: 5, pos: "RB54", avg: 171.5 },
+            { rank: 173, player: "Joshua Palmer", team: "BUF", bye: 7, pos: "WR70", avg: 172.5 },
+            { rank: 174, player: "Mike Gesicki", team: "CIN", bye: 10, pos: "TE23", avg: 175.5 },
+            { rank: 175, player: "Keenan Allen", team: "WR71", avg: 177.5 },
+            { rank: 176, player: "Aaron Rodgers", team: "PIT", bye: 5, pos: "QB28", avg: 177.5 },
+            { rank: 177, player: "DeMario Douglas", team: "NE", bye: 14, pos: "WR72", avg: 177.5 },
+            { rank: 178, player: "Cade Otton", team: "TB", bye: 9, pos: "TE24", avg: 181 },
+            { rank: 179, player: "Dylan Sampson", team: "CLE", bye: 9, pos: "RB55", avg: 181.5 },
+            { rank: 180, player: "Alec Pierce", team: "IND", bye: 11, pos: "WR73", avg: 181.5 },
+            { rank: 181, player: "Nick Chubb", team: "HOU", bye: 6, pos: "RB56", avg: 182.5 },
+            { rank: 182, player: "Justice Hill", team: "BAL", bye: 7, pos: "RB57", avg: 183 },
+            { rank: 183, player: "Pat Bryant", team: "DEN", bye: 12, pos: "WR74", avg: 185 },
+            { rank: 184, player: "Jerome Ford", team: "CLE", bye: 9, pos: "RB58", avg: 191 },
+            { rank: 185, player: "Will Shipley", team: "PHI", bye: 9, pos: "RB59", avg: 191.5 },
+            { rank: 186, player: "Chig Okonkwo", team: "TEN", bye: 10, pos: "TE25", avg: 191.5 },
+            { rank: 187, player: "Mason Taylor", team: "NYJ", bye: 9, pos: "TE26", avg: 192.5 },
+            { rank: 188, player: "Jaylin Noel", team: "HOU", bye: 6, pos: "WR75", avg: 193.5 },
+            { rank: 189, player: "Daniel Jones", team: "IND", bye: 11, pos: "QB29", avg: 194.5 },
+            { rank: 190, player: "DeAndre Hopkins", team: "BAL", bye: 7, pos: "WR76", avg: 195 },
+            { rank: 191, player: "MarShawn Lloyd", team: "GB", bye: 5, pos: "RB60", avg: 195.5 },
+            { rank: 192, player: "Anthony Richardson Sr.", team: "IND", bye: 11, pos: "QB30", avg: 196.5 },
+            { rank: 193, player: "Michael Wilson", team: "ARI", bye: 8, pos: "WR77", avg: 197.5 },
+            { rank: 194, player: "Dyami Brown", team: "JAC", bye: 8, pos: "WR78", avg: 202.5 },
+            { rank: 195, player: "Kareem Hunt", team: "KC", bye: 10, pos: "RB61", avg: 203 },
+            { rank: 196, player: "Blake Corum", team: "LAR", bye: 8, pos: "RB62", avg: 204 },
+            { rank: 197, player: "Juwan Johnson", team: "NO", bye: 11, pos: "TE27", avg: 204.5 },
+            { rank: 198, player: "Jarquez Hunter", team: "LAR", bye: 8, pos: "RB63", avg: 207 },
+            { rank: 199, player: "DJ Giddens", team: "IND", bye: 11, pos: "RB64", avg: 207.5 },
+            { rank: 200, player: "Jalen Coker", team: "CAR", bye: 14, pos: "WR79", avg: 208 },
+            { rank: 201, player: "Dalton Schultz", team: "HOU", bye: 6, pos: "TE28", avg: 209.5 },
+            { rank: 202, player: "Amari Cooper", team: "WR80", avg: 210 },
+            { rank: 203, player: "Russell Wilson", team: "NYG", bye: 14, pos: "QB31", avg: 210 },
+            { rank: 204, player: "Devin Neal", team: "NO", bye: 11, pos: "RB65", avg: 211.5 },
+            { rank: 205, player: "Miles Sanders", team: "DAL", bye: 10, pos: "RB66", avg: 212 },
+            { rank: 206, player: "Calvin Austin III", team: "PIT", bye: 5, pos: "WR81", avg: 213.5 },
+            { rank: 207, player: "Darius Slayton", team: "NYG", bye: 14, pos: "WR82", avg: 215 },
+            { rank: 208, player: "Tyler Shough", team: "NO", bye: 11, pos: "QB32", avg: 216 },
+            { rank: 209, player: "Brashard Smith", team: "KC", bye: 10, pos: "RB67", avg: 217.5 },
+            { rank: 210, player: "Dontayvion Wicks", team: "GB", bye: 5, pos: "WR83", avg: 217.5 },
+            { rank: 211, player: "Theo Johnson", team: "NYG", bye: 14, pos: "TE29", avg: 218.5 },
+            { rank: 212, player: "Tutu Atwell", team: "LAR", bye: 8, pos: "WR84", avg: 220.5 },
+            { rank: 213, player: "Andrei Iosivas", team: "CIN", bye: 10, pos: "WR85", avg: 221 },
+            { rank: 214, player: "Denver Broncos", team: "DST", bye: 12, pos: "DST1", avg: 167 },
+            { rank: 215, player: "Elic Ayomanor", team: "TEN", bye: 10, pos: "WR86", avg: 226.5 },
+            { rank: 216, player: "Jalen Tolbert", team: "DAL", bye: 10, pos: "WR87", avg: 227 },
+            { rank: 217, player: "Ja'Tavion Sanders", team: "CAR", bye: 14, pos: "TE30", avg: 230.5 },
+            { rank: 218, player: "Jaxson Dart", team: "NYG", bye: 14, pos: "QB33", avg: 230.5 },
+            { rank: 219, player: "Ollie Gordon II", team: "MIA", bye: 12, pos: "RB68", avg: 231.5 },
+            { rank: 220, player: "Tyler Lockett", team: "TEN", bye: 10, pos: "WR88", avg: 232.5 },
+            { rank: 221, player: "Adonai Mitchell", team: "IND", bye: 11, pos: "WR89", avg: 232.5 },
+            { rank: 222, player: "Philadelphia Eagles", team: "DST", bye: 9, pos: "DST2", avg: 180 },
+            { rank: 223, player: "Dont'e Thornton Jr.", team: "LV", bye: 8, pos: "WR90", avg: 233.5 },
+            { rank: 224, player: "Baltimore Ravens", team: "DST", bye: 7, pos: "DST3", avg: 184 },
+            { rank: 225, player: "Pittsburgh Steelers", team: "DST", bye: 5, pos: "DST4", avg: 185 },
+            { rank: 226, player: "Raheem Mostert", team: "LV", bye: 8, pos: "RB69", avg: 235.5 },
+            { rank: 227, player: "Elijah Arroyo", team: "SEA", bye: 8, pos: "TE31", avg: 236.5 },
+            { rank: 228, player: "Minnesota Vikings", team: "DST", bye: 6, pos: "DST5", avg: 189 },
+            { rank: 229, player: "Houston Texans", team: "DST", bye: 6, pos: "DST6", avg: 190 },
+            { rank: 230, player: "Cole Kmet", team: "CHI", bye: 5, pos: "TE32", avg: 238.5 },
+            { rank: 231, player: "Buffalo Bills", team: "DST", bye: 7, pos: "DST7", avg: 193 },
+            { rank: 232, player: "Keaton Mitchell", team: "BAL", bye: 7, pos: "RB70", avg: 239.5 },
+            { rank: 233, player: "Diontae Johnson", team: "CLE", bye: 9, pos: "WR91", avg: 241 },
+            { rank: 234, player: "Tahj Brooks", team: "CIN", bye: 10, pos: "RB71", avg: 242 },
+            { rank: 235, player: "Ray-Ray McCloud III", team: "ATL", bye: 5, pos: "WR92", avg: 242 },
+            { rank: 236, player: "Los Angeles Chargers", team: "DST", bye: 12, pos: "DST8", avg: 200 },
+            { rank: 237, player: "Elijah Moore", team: "BUF", bye: 7, pos: "WR93", avg: 243 },
+            { rank: 238, player: "Terrance Ferguson", team: "LAR", bye: 8, pos: "TE33", avg: 243 },
+            { rank: 239, player: "Mike Williams", team: "LAC", bye: 12, pos: "WR94", avg: 243.5 },
+            { rank: 240, player: "Jalen Royals", team: "KC", bye: 10, pos: "WR95", avg: 243.5 },
+            { rank: 241, player: "Kansas City Chiefs", team: "DST", bye: 10, pos: "DST9", avg: 202 },
+            { rank: 242, player: "Tyler Higbee", team: "LAR", bye: 8, pos: "TE34", avg: 244.5 },
+            { rank: 243, player: "Roman Wilson", team: "PIT", bye: 5, pos: "WR96", avg: 244.5 },
+            { rank: 244, player: "Los Angeles Rams", team: "DST", bye: 8, pos: "DST10", avg: 205 },
+            { rank: 245, player: "Joe Flacco", team: "CLE", bye: 9, pos: "QB34", avg: 245.5 },
+            { rank: 246, player: "Detroit Lions", team: "DST", bye: 8, pos: "DST11", avg: 206 },
+            { rank: 247, player: "Green Bay Packers", team: "DST", bye: 5, pos: "DST12", avg: 207 },
+            { rank: 248, player: "Shedeur Sanders", team: "CLE", bye: 9, pos: "QB35", avg: 247.5 },
+            { rank: 249, player: "Noah Gray", team: "KC", bye: 10, pos: "TE35", avg: 248 },
+            { rank: 250, player: "Sean Tucker", team: "TB", bye: 9, pos: "RB72", avg: 248 },
+            { rank: 251, player: "Kyle Monangai", team: "CHI", bye: 5, pos: "RB73", avg: 249 },
+            { rank: 252, player: "Dallas Cowboys", team: "DST", bye: 10, pos: "DST13", avg: 213 },
+            { rank: 253, player: "San Francisco 49ers", team: "DST", bye: 14, pos: "DST14", avg: 216 },
+            { rank: 254, player: "Kirk Cousins", team: "ATL", bye: 5, pos: "QB36", avg: 251 },
+            { rank: 255, player: "Seattle Seahawks", team: "DST", bye: 8, pos: "DST15", avg: 217 },
+            { rank: 256, player: "Tyler Conklin", team: "LAC", bye: 12, pos: "TE36", avg: 253 },
+            { rank: 257, player: "New York Jets", team: "DST", bye: 9, pos: "DST16", avg: 221 },
+            { rank: 258, player: "Chicago Bears", team: "DST", bye: 5, pos: "DST17", avg: 222 },
+            { rank: 259, player: "Kendre Miller", team: "NO", bye: 11, pos: "RB74", avg: 254 },
+            { rank: 260, player: "Tampa Bay Buccaneers", team: "DST", bye: 9, pos: "DST18", avg: 225 },
+            { rank: 261, player: "Jordan James", team: "SF", bye: 14, pos: "RB75", avg: 256 },
+            { rank: 262, player: "Elijah Mitchell", team: "KC", bye: 10, pos: "RB76", avg: 256 },
+            { rank: 263, player: "Trevor Etienne", team: "CAR", bye: 14, pos: "RB77", avg: 257 },
+            { rank: 264, player: "Devontez Walker", team: "BAL", bye: 7, pos: "WR97", avg: 230 },
+            { rank: 265, player: "Oronde Gadsden II", team: "LAC", bye: 12, pos: "TE37", avg: 259.5 },
+            { rank: 266, player: "Taysom Hill", team: "NO", bye: 11, pos: "TE38", avg: 265.5 },
+            { rank: 267, player: "Washington Commanders", team: "DST", bye: 12, pos: "DST19", avg: 234 },
+            { rank: 268, player: "Ty Johnson", team: "BUF", bye: 7, pos: "RB78", avg: 260 },
+            { rank: 269, player: "New England Patriots", team: "DST", bye: 14, pos: "DST20", avg: 235 },
+            { rank: 270, player: "Cleveland Browns", team: "DST", bye: 9, pos: "DST21", avg: 237 },
+            { rank: 271, player: "New York Giants", team: "DST", bye: 14, pos: "DST22", avg: 238 },
+            { rank: 272, player: "Isaiah Davis", team: "NYJ", bye: 9, pos: "RB79", avg: 270 },
+            { rank: 273, player: "Will Dissly", team: "LAC", bye: 12, pos: "TE39", avg: 239 },
+            { rank: 274, player: "Woody Marks", team: "HOU", bye: 6, pos: "RB80", avg: 263 },
+            { rank: 275, player: "Tre Tucker", team: "LV", bye: 8, pos: "WR98", avg: 263 },
+            { rank: 276, player: "Demarcus Robinson", team: "SF", bye: 14, pos: "WR99", avg: 242 },
+            { rank: 277, player: "Tory Horton", team: "SEA", bye: 8, pos: "WR100", avg: 244 },
+            { rank: 278, player: "Emanuel Wilson", team: "GB", bye: 5, pos: "RB81", avg: 245 },
+            { rank: 279, player: "Isaac TeSlaa", team: "DET", bye: 8, pos: "WR101", avg: 268 },
+            { rank: 280, player: "Jacory Croskey-Merritt", team: "WAS", bye: 12, pos: "RB82", avg: 266.5 },
+            { rank: 281, player: "Marquez Valdes-Scantling", team: "SEA", bye: 8, pos: "WR102", avg: 271 },
+            { rank: 282, player: "Jalen Milroe", team: "SEA", bye: 8, pos: "QB37", avg: 267.5 },
+            { rank: 283, player: "Zack Moss", team: "CIN", bye: 10, pos: "RB83", avg: 267.5 },
+            { rank: 284, player: "Indianapolis Colts", team: "DST", bye: 11, pos: "DST23", avg: 251 },
+            { rank: 285, player: "Arizona Cardinals", team: "DST", bye: 8, pos: "DST24", avg: 252 },
+            { rank: 286, player: "Parker Washington", team: "JAC", bye: 8, pos: "WR103", avg: 253 },
+            { rank: 287, player: "Josh Reynolds", team: "NYJ", bye: 9, pos: "WR104", avg: 278.5 },
+            { rank: 288, player: "Malik Washington", team: "MIA", bye: 12, pos: "WR105", avg: 282.5 },
+            { rank: 289, player: "Audric Estime", team: "DEN", bye: 12, pos: "RB84", avg: 272.5 },
+            { rank: 290, player: "Jaylin Lane", team: "WAS", bye: 12, pos: "WR106", avg: 275 },
+            { rank: 291, player: "Curtis Samuel", team: "BUF", bye: 7, pos: "WR107", avg: 285.5 },
+            { rank: 292, player: "Savion Williams", team: "GB", bye: 5, pos: "WR108", avg: 263 },
+            { rank: 293, player: "Michael Mayer", team: "LV", bye: 8, pos: "TE40", avg: 264 },
+            { rank: 294, player: "Tai Felton", team: "MIN", bye: 6, pos: "WR109", avg: 265 },
+            { rank: 295, player: "Kayshon Boutte", team: "NE", bye: 14, pos: "WR110", avg: 275.5 },
+            { rank: 296, player: "Jaleel McLaughlin", team: "DEN", bye: 12, pos: "RB85", avg: 268 },
+            { rank: 297, player: "Xavier Restrepo", team: "TEN", bye: 10, pos: "WR111", avg: 277 },
+            { rank: 298, player: "KaVontae Turpin", team: "DAL", bye: 10, pos: "WR112", avg: 290.5 },
+            { rank: 299, player: "Jordan Whittington", team: "LAR", bye: 8, pos: "WR113", avg: 285 },
+            { rank: 300, player: "Noah Brown", team: "WAS", bye: 12, pos: "WR114", avg: 271 },
+            { rank: 301, player: "Devaughn Vele", team: "DEN", bye: 12, pos: "WR115", avg: 283.5 },
+            { rank: 302, player: "Atlanta Falcons", team: "DST", bye: 5, pos: "DST25", avg: 273 },
+            { rank: 303, player: "Mack Hollins", team: "NE", bye: 14, pos: "WR116", avg: 273 },
+            { rank: 304, player: "Jalen Nailor", team: "MIN", bye: 6, pos: "WR117", avg: 287 },
+            { rank: 305, player: "Jermaine Burton", team: "CIN", bye: 10, pos: "WR118", avg: 299.5 },
+            { rank: 306, player: "Brandin Cooks", team: "NO", bye: 11, pos: "WR119", avg: 282 },
+            { rank: 307, player: "Cincinnati Bengals", team: "DST", bye: 10, pos: "DST26", avg: 279 },
+            { rank: 308, player: "Ben Sinnott", team: "WAS", bye: 12, pos: "TE41", avg: 290.5 },
+            { rank: 309, player: "Ja'Lynn Polk", team: "NE", bye: 14, pos: "WR120", avg: 281 },
+            { rank: 310, player: "Allen Lazard", team: "NYJ", bye: 9, pos: "WR121", avg: 295 },
+            { rank: 311, player: "Troy Franklin", team: "DEN", bye: 12, pos: "WR122", avg: 284.5 },
+            { rank: 312, player: "Harold Fannin Jr.", team: "CLE", bye: 9, pos: "TE42", avg: 286 },
+            { rank: 313, player: "Nick Westbrook-Ikhine", team: "MIA", bye: 12, pos: "WR123", avg: 288 },
+            { rank: 314, player: "Miami Dolphins", team: "DST", bye: 12, pos: "DST27", avg: 285 },
+            { rank: 315, player: "Phil Mafah", team: "DAL", bye: 10, pos: "RB86", avg: 286 },
+            { rank: 316, player: "Devin Singletary", team: "NYG", bye: 14, pos: "RB87", avg: 287 },
+            { rank: 317, player: "Las Vegas Raiders", team: "DST", bye: 8, pos: "DST28", avg: 293 },
+            { rank: 318, player: "Tim Patrick", team: "DET", bye: 8, pos: "WR124", avg: 296 },
+            { rank: 319, player: "Kenneth Gainwell", team: "PIT", bye: 5, pos: "RB88", avg: 297 },
+            { rank: 320, player: "Cam Akers", team: "NO", bye: 11, pos: "RB89", avg: 304 },
+            { rank: 321, player: "Josh Oliver", team: "MIN", bye: 6, pos: "TE43", avg: 305 },
+            { rank: 322, player: "Marcus Mariota", team: "WAS", bye: 12, pos: "QB38", avg: 306 },
+            { rank: 323, player: "Tennessee Titans", team: "DST", bye: 10, pos: "DST29", avg: 309 },
+            { rank: 324, player: "Jacksonville Jaguars", team: "DST", bye: 8, pos: "DST30", avg: 311 },
+            { rank: 325, player: "Davis Mills", team: "HOU", bye: 6, pos: "QB39", avg: 313 },
+            { rank: 326, player: "Khalil Herbert", team: "IND", bye: 11, pos: "RB90", avg: 314 },
+            { rank: 327, player: "Tanner McKee", team: "PHI", bye: 9, pos: "QB40", avg: 315 },
+            { rank: 328, player: "Jameis Winston", team: "NYG", bye: 14, pos: "QB41", avg: 316 },
+            { rank: 329, player: "Christian Watson", team: "GB", bye: 5, pos: "WR125", avg: 317 },
+            { rank: 330, player: "Carolina Panthers", team: "DST", bye: 14, pos: "DST31", avg: 319 },
+            { rank: 331, player: "Van Jefferson", team: "TEN", bye: 10, pos: "WR126", avg: 320 },
+            { rank: 332, player: "Noah Fant", team: "SEA", bye: 8, pos: "TE44", avg: 321 },
+            { rank: 333, player: "Dawson Knox", team: "BUF", bye: 7, pos: "TE45", avg: 323 }
+        ];
+
+        // Global state
+        let currentDraftId = null;
+        let teams = []; 
+        let masterPlayerPool = []; 
+        let availablePlayersList = []; 
+        let draftOrder = [];
+        let currentPickIndex = 0;
+        let currentRound = 1;
+        let pickInRound = 1;
+        const TOTAL_ROUNDS = 12;
+        const NUM_TEAMS = 12;
+        const PICK_THOUGHT_DISPLAY_MS = 2000; 
+        const PICK_EXECUTION_DELAY_MS = 500; 
+        let userControlledTeamId = null; 
+        let selectedPlayerForUserDraft = null; 
+        let userPickTimerInterval = null;
+        let userPickTimeRemaining = 0;
+        const USER_PICK_TIME_SECONDS = 30;
+        let mainDraftLoopTimeoutId = null; // To store the timeout ID for the main draft loop
+
+
+        // DOM Elements
+        const draftBoardGrid = document.querySelector('.draft-board-grid'); 
+        const teamRostersDiv = document.getElementById('teamRosters');
+        const availablePlayersDiv = document.getElementById('availablePlayers');
+        const positionFilter = document.getElementById('positionFilter');
+        const draftStatusDiv = document.getElementById('draftStatus');
+        const currentPickInfoDiv = document.getElementById('currentPickInfo');
+        const platformADPStatusDiv = document.getElementById('platformADPStatus');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const aiThoughtProcessBox = document.getElementById('aiThoughtProcessBox');
+        const loadingStatusText = document.getElementById('loadingStatusText');
+        const errorMessageBar = document.getElementById('errorMessageBar');
+        const draftViewElements = document.getElementById('draftViewElements');
+        const draftControlsTop = document.getElementById('draftControlsTop');
+        const draftControlsBottom = document.getElementById('draftControlsBottom');
+        const resetDraftButtonTop = document.getElementById('resetDraftButtonTop'); 
+        const resetDraftButtonBottom = document.getElementById('resetDraftButtonBottom'); 
+        const startDraftButton = document.getElementById('startDraftButton'); 
+        const draftSelectedPlayerButton = document.getElementById('draftSelectedPlayerButton');
+        const pickTimerDisplay = document.getElementById('pickTimerDisplay');
+
+
+        let strategySelects = []; 
+
+
+        function displayGlobalError(message) {
+            if (message.toLowerCase().includes("url or anon key") || message.toLowerCase().includes("client creation error")) {
+                errorMessageBar.textContent = message;
+                errorMessageBar.style.display = 'block';
+            } else {
+                errorMessageBar.textContent = message; 
+                errorMessageBar.style.display = 'block';
+                console.error("APP ERROR:", message); 
+            }
+            loadingOverlay.style.display = 'none'; 
+        }
+
+        function hideGlobalError() {
+            errorMessageBar.style.display = 'none';
+        }
+
+        // --- DATA HANDLING & NORMALIZATION ---
+        function normalizePlayerName(name) {
+            if (!name) return '';
+            return name.toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"") 
+                .replace(/\s+/g, ' ') 
+                .replace(/\s(jr|sr|ii|iii|iv)$/, '') 
+                .trim();
+        }
+
+        async function fetchSleeperPlayers() {
+            loadingStatusText.textContent = 'Fetching player data from Sleeper API...';
+            // console.log("Fetching Sleeper players...");
+            try {
+                const response = await fetch('https://api.sleeper.app/v1/players/nfl');
+                if (!response.ok) {
+                    throw new Error(`Sleeper API request failed: ${response.status}`);
+                }
+                const sleeperData = await response.json();
+                // console.log(`Workspaceed ${Object.keys(sleeperData).length} players from Sleeper.`);
+                loadingStatusText.textContent = 'Sleeper data fetched successfully.';
+                return sleeperData;
+            } catch (error) {
+                console.error("Error fetching Sleeper players:", error);
+                throw error; 
+            }
+        }
+
+        function processHardcodedAdp(adpArray) {
+            loadingStatusText.textContent = 'Processing hardcoded ADP data...';
+            // console.log("Processing hardcoded ADP data...");
+            const adpMap = {};
+            adpArray.forEach(item => {
+                const normalizedName = normalizePlayerName(item.player);
+                const adp = parseFloat(item.avg); 
+
+                if (normalizedName && item.player && !isNaN(adp)) {
+                    if (!adpMap[normalizedName]) { 
+                        adpMap[normalizedName] = {
+                            adp: adp,
+                            originalCsvName: item.player, 
+                            csvTeam: item.team,       
+                            csvPosition: item.pos     
+                        };
+                    }
+                } else {
+                    // console.warn(`Skipping hardcoded ADP item due to missing/invalid name or ADP: Player: ${item.player}, ADP: ${item.avg}`);
+                }
+            });
+            // console.log(`Processed ${Object.keys(adpMap).length} players from hardcoded ADP.`);
+            loadingStatusText.textContent = 'Hardcoded ADP processed.';
+            return adpMap;
+        }
+
+
+        function mergePlayerData(sleeperPlayers, processedAdpData) { 
+            if (!sleeperPlayers) throw new Error("Sleeper player data is missing for merge.");
+            if (!processedAdpData || Object.keys(processedAdpData).length === 0) throw new Error("Processed ADP data is empty.");
+            
+            loadingStatusText.textContent = 'Merging Sleeper data with ADP...';
+            // console.log("Merging Sleeper data with processed ADP...");
+            const mergedPool = [];
+            let matchedCount = 0;
+            let sleeperOnlyCount = 0;
+            const validPositions = new Set(['QB', 'RB', 'WR', 'TE', 'DST', 'DEF']); 
+
+            for (const playerId in sleeperPlayers) {
+                const sPlayer = sleeperPlayers[playerId];
+                if (!sPlayer.player_id || !sPlayer.full_name || !sPlayer.position) { 
+                    continue;
+                }
+                
+                let sleeperPosition = sPlayer.position.toUpperCase();
+                if (sleeperPosition === 'DEF') sleeperPosition = 'DST';
+
+                if (!validPositions.has(sleeperPosition)) {
+                    continue; 
+                }
+
+
+                const normalizedSleeperName = normalizePlayerName(sPlayer.full_name);
+                const adpMatch = processedAdpData[normalizedSleeperName]; 
+                let adpToUse = 999; 
+                let sourceTeam = sPlayer.team || 'FA'; 
+                let sourcePos = sleeperPosition; 
+
+
+                if (adpMatch) {
+                    adpToUse = adpMatch.adp;
+                    matchedCount++;
+                } else {
+                    sleeperOnlyCount++;
+                }
+                
+                const yearsExp = parseInt(sPlayer.years_experience, 10);
+                const isRookie = yearsExp === 0;
+
+                mergedPool.push({
+                    id: sPlayer.player_id,
+                    name: sPlayer.full_name, 
+                    normalizedName: normalizedSleeperName,
+                    team: sourceTeam, 
+                    position: sourcePos, 
+                    bye: parseInt(sPlayer.bye_week, 10) || 0,
+                    adp: adpToUse,
+                    years_exp: yearsExp,
+                    isRookie: isRookie,
+                    search: sPlayer.search_full_name 
+                });
+            }
+            console.log(`Merged player pool: ${mergedPool.length} players. ${matchedCount} matched with ADP. ${sleeperOnlyCount} Sleeper-only (default ADP).`);
+            loadingStatusText.textContent = 'Player data merged.';
+            
+            const uniquePlayersById = Array.from(new Map(mergedPool.map(item => [item['id'], item])).values());
+            uniquePlayersById.sort((a, b) => a.adp - b.adp);
+            console.log(`Final unique player pool size: ${uniquePlayersById.length}`);
+            return uniquePlayersById;
+        }
+
+
+        // --- AI DRAFTING STRATEGIES ---
+        const strategies = {
+            BEST_PLAYER: (team, available, currentRound) => available[0], 
+            ZERO_RB: (team, available, currentRound) => {
+                if (currentRound <= 5) { 
+                    const nonRB = available.filter(p => p.position !== 'RB');
+                    if (nonRB.length > 0) return nonRB[0];
+                }
+                const rbCount = team.roster.filter(p => p.position === 'RB').length;
+                if (rbCount < 2 && currentRound > 5) return available[0];
+                const nonRBPreferred = available.filter(p => p.position !== 'RB');
+                return nonRBPreferred.length > 0 ? nonRBPreferred[0] : available[0];
+            },
+            ROOKIE_GAMBLER: (team, available, currentRound) => {
+                const rookies = available.filter(p => p.isRookie);
+                if (rookies.length > 0) {
+                    for (let i = 0; i < Math.min(3, available.length); i++) {
+                        if (available[i].isRookie) return available[i];
+                    }
+                    if (available.length > 0 && rookies.length > 0 && rookies[0].adp < available[0].adp + 12 && currentRound > 2) return rookies[0];
+                }
+                return available[0]; 
+            },
+            HERO_RB: (team, available, currentRound) => {
+                const rbCount = team.roster.filter(p => p.position === 'RB').length;
+                if (rbCount === 0 && currentRound <= 2) { 
+                    const rbs = available.filter(p => p.position === 'RB');
+                    if (rbs.length > 0 && rbs[0].adp < 25) return rbs[0]; 
+                }
+                if (rbCount >= 1 && currentRound > 2 && currentRound <= 7) { 
+                    const nonRB = available.filter(p => p.position !== 'RB');
+                    if (nonRB.length > 0) return nonRB[0];
+                }
+                return available[0]; 
+            },
+            ONESIES_LAST: (team, available, currentRound) => { 
+                const qbCount = team.roster.filter(p => p.position === 'QB').length;
+                const teCount = team.roster.filter(p => p.position === 'TE').length;
+                if (currentRound <= 8) { 
+                    if (qbCount === 0 && teCount === 0) {
+                        const nonQBTE = available.filter(p => p.position !== 'QB' && p.position !== 'TE');
+                        if (nonQBTE.length > 0) return nonQBTE[0];
+                    } else if (qbCount === 0) {
+                        const nonQB = available.filter(p => p.position !== 'QB');
+                        if (nonQB.length > 0) return nonQB[0];
+                    } else if (teCount === 0) {
+                        const nonTE = available.filter(p => p.position !== 'TE');
+                        if (nonTE.length > 0) return nonTE[0];
+                    } else return available[0];
+                }
+                if (qbCount === 0 && currentRound > 8) {
+                    const qbs = available.filter(p => p.position === 'QB');
+                    if (qbs.length > 0) return qbs[0];
+                }
+                if (teCount === 0 && currentRound > 8) {
+                    const tes = available.filter(p => p.position === 'TE');
+                    if (tes.length > 0) return tes[0];
+                }
+                return available[0]; 
+            },
+            HEAVY_RB: (team, available, currentRound) => {
+                const rbCount = team.roster.filter(p => p.position === 'RB').length;
+                if (rbCount < 3 && currentRound <= 6) { 
+                    const rbs = available.filter(p => p.position === 'RB');
+                    if (rbs.length > 0) return rbs[0];
+                }
+                return available[0];
+            }
+        };
+        const strategyNames = Object.keys(strategies);
+
+        function getAIPlayerConsiderations(team, available, strategyName, count = 3) {
+            let considerations = [];
+            if (!available || available.length === 0) return []; 
+            if (strategyName === "ZERO_RB" && currentRound <= 5) {
+                considerations = available.filter(p => p.position !== 'RB').slice(0, count);
+            } else if (strategyName === "ROOKIE_GAMBLER") {
+                const rookies = available.filter(p => p.isRookie);
+                const nonRookies = available.filter(p => !p.isRookie);
+                let tempConsiderations = [];
+                if (rookies.length > 0) tempConsiderations.push(...rookies.slice(0, Math.ceil(count/1.5)));
+                if (nonRookies.length > 0) tempConsiderations.push(...nonRookies.slice(0, count - tempConsiderations.length));
+                considerations = tempConsiderations.sort((a,b) => a.adp - b.adp).slice(0, count);
+            } else considerations = available.slice(0, count);
+            if (considerations.length === 0 && available.length > 0) considerations = available.slice(0, count);
+            return considerations;
+        }
+
+        // --- UI FUNCTIONS ---
+        function setupDraftBoard(isPreDraftSetup = false) { 
+            draftBoardGrid.innerHTML = ''; 
+            teamRostersDiv.innerHTML = '';
+            strategySelects = []; 
+
+            teams.forEach((team, index) => {
+                const teamCol = document.getElementById(`team-col-${team.id}`) || document.createElement('div');
+                teamCol.innerHTML = ''; 
+                teamCol.classList.add('team-col');
+                teamCol.id = `team-col-${team.id}`;
+
+                if (team.id === userControlledTeamId) {
+                    teamCol.classList.add('user-controlled-team-col-bg');
+                } else {
+                    teamCol.classList.remove('user-controlled-team-col-bg');
+                }
+                
+                const teamHeader = document.createElement('div');
+                teamHeader.classList.add('team-header');
+                
+                const teamControlDiv = document.createElement('div');
+                teamControlDiv.classList.add('team-control-container');
+                teamControlDiv.style.display = isPreDraftSetup ? 'flex' : 'none'; 
+                const radioId = `user-control-${team.id}`;
+                teamControlDiv.innerHTML = `
+                    <input type="radio" id="${radioId}" name="userControlTeam" value="${team.id}" ${userControlledTeamId === team.id ? 'checked' : ''}>
+                    <label for="${radioId}" class="ml-1 text-xs">Control</label>
+                `;
+                teamHeader.appendChild(teamControlDiv);
+                
+                const teamNameDisplay = document.createElement('span');
+                teamNameDisplay.classList.add('team-name-display');
+                teamNameDisplay.id = `team-name-display-${team.id}`;
+                teamNameDisplay.textContent = team.name; 
+                teamHeader.appendChild(teamNameDisplay);
+
+                const select = document.createElement('select');
+                select.classList.add('strategy-select');
+                select.id = `strategy-select-${team.id}`;
+                strategyNames.forEach(stratName => {
+                    const option = document.createElement('option');
+                    option.value = stratName;
+                    option.textContent = stratName.replace(/_/g, ' ');
+                    if (stratName === team.strategy) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                select.disabled = !isPreDraftSetup || team.id === userControlledTeamId; 
+                teamHeader.appendChild(select);
+                strategySelects[index] = select; 
+
+                const radioInput = teamControlDiv.querySelector('input[type="radio"]');
+                if (radioInput) { 
+                    radioInput.addEventListener('change', (event) => handleUserTeamSelection(event.target.value));
+                }
+
+                teamCol.appendChild(teamHeader);
+
+                const existingPickCells = teamCol.querySelectorAll('.pick-cell');
+                existingPickCells.forEach(cell => cell.remove());
+
+                // Add new pick cells or update existing ones if they were cleared differently
+                for (let i = 0; i < TOTAL_ROUNDS; i++) {
+                    const pickCell = document.createElement('div');
+                    pickCell.classList.add('pick-cell', 'empty');
+                    pickCell.id = `pickcell-${team.id}-${i}`;
+                    pickCell.innerHTML = `<span class="text-gray-500 text-xs">R${i+1}</span>`;
+                    teamCol.appendChild(pickCell);
+                }
+                
+                // Repopulate picks if it's not a full reset (e.g. when draft completes)
+                if (!isPreDraftSetup && team.roster.length > 0) {
+                    team.roster.forEach((pickedPlayer, roundIndex) => {
+                        // This logic assumes picks are stored in order.
+                        // For simplicity, we'll find the pick number in the original draftOrder.
+                        // This part might need refinement if we want to show exact pick numbers for past drafts.
+                        // For now, it just fills the cells in order.
+                        const pickCellToUpdate = document.getElementById(`pickcell-${team.id}-${roundIndex}`);
+                        if(pickCellToUpdate) {
+                            pickCellToUpdate.classList.remove('empty');
+                             const rookieTag = pickedPlayer.isRookie ? '<span class="rookie-tag">(R)</span>' : '';
+                             // We need the original overall pick number for this display if we want to show it.
+                             // For now, just player info.
+                            pickCellToUpdate.innerHTML = `
+                                <span class="player-name">${pickedPlayer.name}${rookieTag}</span>
+                                <span class="player-info">${pickedPlayer.position} - ${pickedPlayer.team || 'N/A'}</span>
+                                <span class="player-info text-xs text-amber-300">(ADP: ${pickedPlayer.adp.toFixed(1)})</span> 
+                            `;
+                        }
+                    });
+                }
+
+
+                if (!document.getElementById(teamCol.id)) {
+                    draftBoardGrid.appendChild(teamCol); 
+                }
+                
+                let rosterContainer = document.getElementById(`roster-${team.id}`);
+                if (!rosterContainer) {
+                    rosterContainer = document.createElement('div');
+                    rosterContainer.id = `roster-${team.id}`;
+                    rosterContainer.classList.add('p-2', 'bg-gray-700', 'rounded');
+                    teamRostersDiv.appendChild(rosterContainer);
+                }
+                rosterContainer.innerHTML = `<h3 class="font-semibold text-sky-300 mb-1">${team.name} <span class="team-strategy-display" id="roster-strategy-${team.id}">(${team.strategy.replace(/_/g, ' ')})</span></h3><ul class="list-disc list-inside space-y-0.5"></ul>`;
+                // Repopulate roster list if not a full reset
+                 if (!isPreDraftSetup && team.roster.length > 0) {
+                    const rosterUl = rosterContainer.querySelector('ul');
+                    team.roster.forEach(p => {
+                        const li = document.createElement('li');
+                        const rookieTagRoster = p.isRookie ? '<span class="rookie-tag">(R)</span>' : '';
+                        li.innerHTML = `${p.name} (${p.position})${rookieTagRoster} - ADP: ${p.adp.toFixed(1)}`;
+                        rosterUl.appendChild(li);
+                    });
+                 }
+
+            });
+        }
+        
+        function handleUserTeamSelection(selectedTeamId) {
+            const previouslyControlledTeamId = userControlledTeamId;
+
+            if (userControlledTeamId === selectedTeamId) { 
+                userControlledTeamId = null;
+                const teamCol = document.getElementById(`team-col-${selectedTeamId}`);
+                if (teamCol) teamCol.classList.remove('user-controlled-team-col-bg');
+                const teamIndex = teams.findIndex(t => t.id === selectedTeamId);
+                if (teamIndex !== -1 && strategySelects[teamIndex]) {
+                    strategySelects[teamIndex].disabled = false; 
+                }
+                console.log("User deselected team control.");
+            } else {
+                userControlledTeamId = selectedTeamId;
+                console.log(`User selected to control team: ${userControlledTeamId}`);
+                const teamToUpdate = teams.find(t => t.id === selectedTeamId);
+                if (teamToUpdate) {
+                    const currentName = teamToUpdate.name;
+                    const newTeamName = prompt(`Enter name for ${currentName}:`, currentName);
+                    if (newTeamName && newTeamName.trim() !== "") {
+                        teamToUpdate.name = newTeamName.trim();
+                        const nameDisplay = document.getElementById(`team-name-display-${selectedTeamId}`);
+                        if (nameDisplay) nameDisplay.textContent = teamToUpdate.name;
+                        const rosterNameDisplay = document.querySelector(`#roster-${selectedTeamId} h3`);
+                        if (rosterNameDisplay) rosterNameDisplay.childNodes[0].nodeValue = `${teamToUpdate.name} `; 
+                    }
+                }
+            }
+
+            teams.forEach((team, index) => {
+                const teamCol = document.getElementById(`team-col-${team.id}`);
+                const stratSelect = strategySelects[index]; 
+                
+                if (team.id === userControlledTeamId) {
+                    if (teamCol) teamCol.classList.add('user-controlled-team-col-bg');
+                    if (stratSelect) stratSelect.disabled = true; 
+                } else {
+                    if (teamCol) teamCol.classList.remove('user-controlled-team-col-bg');
+                    // Enable strategy select if it's pre-draft (i.e., draftInProgress is false)
+                    if (stratSelect) stratSelect.disabled = draftInProgress; 
+                }
+            });
+        }
+
+
+        function updateTeamHeaderStrategyDisplay(teamId, strategyKey) {
+            const selectElement = document.getElementById(`strategy-select-${teamId}`);
+            if (selectElement) selectElement.value = strategyKey;
+            
+            const rosterStrategyDisplay = document.getElementById(`roster-strategy-${teamId}`);
+            if(rosterStrategyDisplay) rosterStrategyDisplay.textContent = `(${strategyKey.replace(/_/g, ' ')})`;
+        }
+
+
+        function updateDraftBoard(team, player, round, pickInCurrentRound) {
+            const pickCellId = `pickcell-${team.id}-${round -1}`;
+            const pickCell = document.getElementById(pickCellId);
+            if (pickCell) {
+                pickCell.classList.remove('empty');
+                const rookieTag = player.isRookie ? '<span class="rookie-tag">(R)</span>' : '';
+                pickCell.innerHTML = `
+                    <span class="player-name">${player.name}${rookieTag}</span>
+                    <span class="player-info">${player.position} - ${player.team || 'N/A'}</span> 
+                    <span class="player-info text-xs text-amber-300">R${round}.${pickInCurrentRound} (ADP: ${player.adp.toFixed(1)})</span>
+                `; 
+            }
+            const rosterUl = document.querySelector(`#roster-${team.id} ul`);
+            if (rosterUl) {
+                const li = document.createElement('li');
+                const rookieTagRoster = player.isRookie ? '<span class="rookie-tag">(R)</span>' : '';
+                li.innerHTML = `${player.name} (${player.position})${rookieTagRoster} - ADP: ${player.adp.toFixed(1)}`;
+                rosterUl.appendChild(li);
+            }
+        }
+
+        function updateAvailablePlayersDisplay() {
+            const filterValue = positionFilter.value;
+            const filteredList = availablePlayersList.filter(p => filterValue === 'ALL' || p.position === filterValue);
+            availablePlayersDiv.innerHTML = ''; 
+            
+            filteredList.slice(0, 150).forEach(p => {
+                const rookieTag = p.isRookie ? '<span class="rookie-tag">(R)</span>' : '';
+                const playerRow = document.createElement('div');
+                playerRow.classList.add('player-row');
+                playerRow.dataset.playerId = p.id; 
+                playerRow.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-medium">${p.name}${rookieTag}</span>
+                            <span class="text-gray-400 text-xs"> (${p.position} - ${p.team || 'N/A'})</span>
+                        </div>
+                        <span class="text-gray-300 text-xs">ADP: ${p.adp.toFixed(1)}</span>
+                    </div>`;
+                
+                playerRow.addEventListener('click', () => {
+                    if (userControlledTeamId && draftOrder[currentPickIndex]?.id === userControlledTeamId && draftInProgress) { 
+                        document.querySelectorAll('.player-row.selected-for-draft').forEach(row => row.classList.remove('selected-for-draft'));
+                        playerRow.classList.add('selected-for-draft');
+                        selectedPlayerForUserDraft = p;
+                        draftSelectedPlayerButton.disabled = false; 
+                    }
+                });
+                availablePlayersDiv.appendChild(playerRow);
+            });
+        }
+
+        function updateStatus(message) {
+            draftStatusDiv.textContent = message;
+        }
+
+        function updateCurrentPickInfo(teamName, round, pickNumInRound, overallPick) {
+            if (teamName) {
+                currentPickInfoDiv.textContent = `On The Clock: ${teamName} (Pick ${round}.${pickNumInRound} - Overall: ${overallPick})`;
+                document.querySelectorAll('.team-col').forEach(col => col.classList.remove('on-the-clock'));
+                const currentTeamCol = document.getElementById(`team-col-${draftOrder[currentPickIndex].id}`);
+                if (currentTeamCol) currentTeamCol.classList.add('on-the-clock');
+            } else {
+                currentPickInfoDiv.textContent = '';
+                 document.querySelectorAll('.team-col').forEach(col => col.classList.remove('on-the-clock'));
+            }
+        }
+
+        function displayAIThoughtProcess(team, considerations, strategyName) {
+            let thoughtText = `Team ${team.name} (${strategyName.replace(/_/g, ' ')}) is considering:\n`;
+            if (considerations && considerations.length > 0) {
+                considerations.forEach((p, i) => {
+                    thoughtText += `${i+1}. ${p.name} (${p.position}, ADP: ${p.adp.toFixed(1)})${p.isRookie ? ' (R)' : ''}\n`;
+                });
+            } else {
+                thoughtText += "No specific players matching strict criteria, evaluating best available overall.\n";
+            }
+            if (strategyName === "ZERO_RB" && currentRound <= 5) thoughtText += "Strategy: Avoiding RBs early.";
+            else if (strategyName === "ROOKIE_GAMBLER" && considerations && considerations.some(c => c.isRookie)) thoughtText += "Strategy: Targeting rookie talent.";
+            else if (strategyName === "ONESIES_LAST" && currentRound <=8 && (team.roster.filter(p=>p.position === 'QB').length === 0 || team.roster.filter(p=>p.position === 'TE').length === 0)) thoughtText += "Strategy: Waiting on QB/TE.";
+            else thoughtText += "Strategy: Evaluating top options based on ADP and team needs.";
+            aiThoughtProcessBox.textContent = thoughtText;
+        }
+
+        function startUserPickTimer() {
+            userPickTimeRemaining = USER_PICK_TIME_SECONDS;
+            pickTimerDisplay.textContent = `Time: ${userPickTimeRemaining}s`;
+            pickTimerDisplay.style.display = 'block';
+            draftSelectedPlayerButton.style.display = 'inline-block';
+            draftSelectedPlayerButton.disabled = true; 
+
+            if (userPickTimerInterval) clearInterval(userPickTimerInterval);
+            userPickTimerInterval = setInterval(() => {
+                userPickTimeRemaining--;
+                pickTimerDisplay.textContent = `Time: ${userPickTimeRemaining}s`;
+                if (userPickTimeRemaining <= 0) {
+                    clearInterval(userPickTimerInterval);
+                    pickTimerDisplay.textContent = "Time's up! Auto-picking...";
+                    console.log("User timer expired. Auto-drafting.");
+                    autoDraftForUser();
+                }
+            }, 1000);
+        }
+
+        function clearUserPickTimer() {
+            if (userPickTimerInterval) clearInterval(userPickTimerInterval);
+            pickTimerDisplay.style.display = 'none';
+            draftSelectedPlayerButton.style.display = 'none';
+            selectedPlayerForUserDraft = null;
+             document.querySelectorAll('.player-row.selected-for-draft').forEach(row => row.classList.remove('selected-for-draft'));
+        }
+
+        function autoDraftForUser() {
+            const userTeam = teams.find(t => t.id === userControlledTeamId);
+            if (!userTeam) return; 
+
+            console.log(`Auto-drafting for ${userTeam.name} using BEST_PLAYER strategy.`);
+            aiThoughtProcessBox.textContent = `Time expired for ${userTeam.name}. Auto-picking best player available...`;
+            
+            const eligibleForAuto = availablePlayersList.filter(p => {
+                const qbCount = userTeam.roster.filter(pl => pl.position === 'QB').length;
+                const teCount = userTeam.roster.filter(pl => pl.position === 'TE').length;
+                const dstCount = userTeam.roster.filter(pl => pl.position === 'DST').length;
+                if (p.position === 'QB' && qbCount >= 2) return false;
+                if (p.position === 'TE' && teCount >= 2) return false;
+                if (p.position === 'DST' && dstCount >= 1) return false;
+                return true;
+            });
+
+            const pickedPlayer = strategies.BEST_PLAYER(userTeam, eligibleForAuto.length > 0 ? eligibleForAuto : availablePlayersList, currentRound);
+            
+            if (pickedPlayer) {
+                setTimeout(() => {
+                    executeUserOrAutoPick(pickedPlayer, true); 
+                }, 1000);
+            } else {
+                console.warn(`CRITICAL: Auto-draft for ${userTeam.name} could NOT find a player.`);
+                currentPickIndex++; 
+                if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+                mainDraftLoopTimeoutId = setTimeout(runDraftPickWithThought, PICK_EXECUTION_DELAY_MS);
+            }
+        }
+        
+        function executeUserOrAutoPick(playerToDraft, isAutoPick = false) {
+            const currentTeam = draftOrder[currentPickIndex]; 
+            if (!playerToDraft || !currentTeam || currentTeam.id !== userControlledTeamId) {
+                console.error("Error in executeUserOrAutoPick: Invalid state or player.");
+                currentPickIndex++;
+                if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+                mainDraftLoopTimeoutId = setTimeout(runDraftPickWithThought, PICK_EXECUTION_DELAY_MS);
+                return;
+            }
+
+            console.log(`${isAutoPick ? "Auto-picked" : "User picked"} for ${currentTeam.name}: ${playerToDraft.name}`);
+            currentTeam.roster.push(playerToDraft);
+            availablePlayersList = availablePlayersList.filter(p => p.id !== playerToDraft.id); 
+
+            updateDraftBoard(currentTeam, playerToDraft, currentRound, pickInRound);
+            updateAvailablePlayersDisplay();
+            clearUserPickTimer(); 
+
+            if (supabase && supabaseInitialized) {
+                try {
+                    supabase.from('draft_picks').insert({
+                        draft_id: currentDraftId, pick_number_overall: currentPickIndex + 1, round: currentRound, pick_in_round: pickInRound, team_id: currentTeam.id, team_name: currentTeam.name, 
+                        ai_strategy: isAutoPick ? 'AUTO_BEST_PLAYER' : 'USER_PICK', 
+                        player_sleeper_id: playerToDraft.id, player_name: playerToDraft.name, player_position: playerToDraft.position, player_team: playerToDraft.team, is_rookie: playerToDraft.isRookie, player_adp_at_draft: playerToDraft.adp, picked_at: new Date().toISOString()
+                    }).then(({ error }) => {
+                        if (error) console.error("Supabase error storing user/auto pick:", error.message);
+                    });
+                } catch (error) { console.error("Supabase error storing user/auto pick (outer):", error.message); }
+            }
+
+            currentPickIndex++;
+            if (currentPickIndex < draftOrder.length) {
+                if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+                mainDraftLoopTimeoutId = setTimeout(runDraftPickWithThought, PICK_EXECUTION_DELAY_MS); 
+            } else {
+                completeDraft(); 
+            }
+        }
+
+
+        // --- DRAFT LOGIC ---
+        let isFirstDraftOfTheSession = true; 
+        let draftInProgress = false;
+
+        async function initializeNewDraft() {
+            if (draftInProgress && !isFirstDraftOfTheSession) { 
+                console.warn("Draft already in progress, cannot start new draft.");
+                return;
+            }
+            draftInProgress = true;
+            console.log("initializeNewDraft called.");
+            if (masterPlayerPool.length === 0) {
+                console.error("Master player pool is empty. Cannot start draft.");
+                displayGlobalError("Error: Player data not loaded.");
+                loadingOverlay.style.display = 'none'; 
+                draftInProgress = false;
+                return;
+            }
+            updateStatus('Initializing new draft...');
+            aiThoughtProcessBox.textContent = "New draft starting soon...";
+            document.querySelector('.draft-board-container').style.display = 'block'; 
+            draftBoardGrid.style.display = 'flex'; 
+            aiThoughtProcessBox.style.display = 'block';
+            draftViewElements.style.display = 'grid';
+            draftControlsTop.style.display = 'block'; // Show top reset during draft
+            draftControlsTop.querySelector('.draft-complete-message').style.display = 'none'; // Hide "complete" msg
+            draftControlsBottom.style.display = 'none'; // Keep bottom controls hidden until end
+            startDraftButton.style.display = 'none'; 
+            clearUserPickTimer(); 
+            
+            currentDraftId = `draft_${new Date().getTime()}_${Math.random().toString(36).substring(2, 9)}`;
+            console.log(`New Draft ID: ${currentDraftId}`);
+
+            // Initialize teams if it's the very first draft of the session or if teams array is empty
+            if (isFirstDraftOfTheSession || teams.length !== NUM_TEAMS) {
+                 teams = [];
+                 for (let i = 0; i < NUM_TEAMS; i++) {
+                    teams.push({
+                        id: `team-${i + 1}`,
+                        name: `Team ${i + 1}`, 
+                        roster: [],
+                        strategy: strategyNames[Math.floor(Math.random() * strategyNames.length)]
+                    });
+                }
+            } else { 
+                // For redrafts, update strategies from dropdowns and clear rosters
+                // User-entered names are preserved in the `teams` array.
+                teams.forEach((team, index) => {
+                    if (team.id !== userControlledTeamId) { 
+                        team.strategy = strategySelects[index].value;
+                    }
+                    team.roster = []; 
+                    updateTeamHeaderStrategyDisplay(team.id, team.strategy); 
+                });
+            }
+            
+            setupDraftBoard(false); // false to disable controls during draft
+
+            availablePlayersList = JSON.parse(JSON.stringify(masterPlayerPool)); 
+            availablePlayersList.sort((a, b) => a.adp - b.adp); 
+
+            draftOrder = [];
+            for (let r = 0; r < TOTAL_ROUNDS; r++) {
+                const roundTeams = (r % 2 === 0) ? [...teams] : [...teams].reverse();
+                roundTeams.forEach(team => draftOrder.push(team));
+            }
+
+            currentPickIndex = 0;
+            
+            updateAvailablePlayersDisplay();
+            updateStatus(`Draft ${currentDraftId.substring(0,10)}... in Progress`);
+            loadingOverlay.style.display = 'none';
+            
+            isFirstDraftOfTheSession = false; 
+            console.log("Starting draft pick sequence...");
+            if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+            mainDraftLoopTimeoutId = setTimeout(runDraftPickWithThought, PICK_THOUGHT_DISPLAY_MS / 2); 
+        }
+
+        async function runDraftPickWithThought() {
+            if (!draftInProgress) {
+                console.log("runDraftPickWithThought: draftInProgress is false, exiting.");
+                return;
+            }
+
+            if (currentPickIndex >= draftOrder.length) {
+                await completeDraft();
+                return;
+            }
+            const currentTeam = draftOrder[currentPickIndex];
+            currentRound = Math.floor(currentPickIndex / NUM_TEAMS) + 1; 
+            pickInRound = (currentPickIndex % NUM_TEAMS) + 1; 
+            updateCurrentPickInfo(currentTeam.name, currentRound, pickInRound, currentPickIndex + 1);
+
+            if (currentTeam.id === userControlledTeamId) {
+                aiThoughtProcessBox.textContent = `It's YOUR PICK, ${currentTeam.name}! Select a player (30s timer).`;
+                startUserPickTimer();
+            } else {
+                draftSelectedPlayerButton.style.display = 'none'; 
+                const eligiblePlayersForTeam = availablePlayersList.filter(p => {
+                    const qbCount = currentTeam.roster.filter(pl => pl.position === 'QB').length;
+                    const teCount = currentTeam.roster.filter(pl => pl.position === 'TE').length;
+                    const dstCount = currentTeam.roster.filter(pl => pl.position === 'DST').length;
+                    if (p.position === 'QB' && qbCount >= 2) return false;
+                    if (p.position === 'TE' && teCount >= 2) return false;
+                    if (p.position === 'DST' && dstCount >= 1) return false; 
+                    if (p.position === 'DST' && currentRound < TOTAL_ROUNDS - 2 && dstCount === 0) return false; 
+                    if (p.position === 'QB' && qbCount >= 1 && currentRound < TOTAL_ROUNDS - 4) return false; 
+                    if (p.position === 'TE' && teCount >= 1 && currentRound < TOTAL_ROUNDS - 5) return false; 
+                    return true;
+                });
+                const considerations = getAIPlayerConsiderations(currentTeam, eligiblePlayersForTeam.length > 0 ? eligiblePlayersForTeam : availablePlayersList, currentTeam.strategy);
+                displayAIThoughtProcess(currentTeam, considerations, currentTeam.strategy);
+                if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+                mainDraftLoopTimeoutId = setTimeout(() => executePick(currentTeam, eligiblePlayersForTeam), PICK_THOUGHT_DISPLAY_MS);
+            }
+        }
+
+        async function executePick(currentTeam, eligiblePlayers) { 
+            if (!draftInProgress) return;
+
+            const strategyFn = strategies[currentTeam.strategy] || strategies.BEST_PLAYER; 
+            let pickedPlayer = null;
+            if (eligiblePlayers && eligiblePlayers.length > 0) { 
+                 pickedPlayer = strategyFn(currentTeam, eligiblePlayers, currentRound);
+            } else if (availablePlayersList.length > 0) {
+                console.warn(`Team ${currentTeam.name} (Strategy: ${currentTeam.strategy}) had no strictly eligible players, falling back to overall BPA from main list.`);
+                pickedPlayer = strategyFn(currentTeam, availablePlayersList, currentRound); 
+            }
+            if (!pickedPlayer && availablePlayersList.length > 0) { 
+                console.warn(`Absolute fallback for Team ${currentTeam.name}: picking top from availablePlayersList.`);
+                pickedPlayer = availablePlayersList[0];
+            }
+
+            if (pickedPlayer) {
+                console.log(`AI Team ${currentTeam.name} (ID: ${currentTeam.id}) PICKED: ${pickedPlayer.name} (${pickedPlayer.position}) ADP: ${pickedPlayer.adp.toFixed(1)}`);
+                currentTeam.roster.push(pickedPlayer);
+                availablePlayersList = availablePlayersList.filter(p => p.id !== pickedPlayer.id); 
+                updateDraftBoard(currentTeam, pickedPlayer, currentRound, pickInRound);
+                updateAvailablePlayersDisplay();
+                if (supabase && supabaseInitialized) {
+                    try {
+                        const { error } = await supabase.from('draft_picks').insert({
+                            draft_id: currentDraftId, pick_number_overall: currentPickIndex + 1, round: currentRound, pick_in_round: pickInRound, team_id: currentTeam.id, team_name: currentTeam.name, ai_strategy: currentTeam.strategy, player_sleeper_id: pickedPlayer.id, player_name: pickedPlayer.name, player_position: pickedPlayer.position, player_team: pickedPlayer.team, is_rookie: pickedPlayer.isRookie, player_adp_at_draft: pickedPlayer.adp, picked_at: new Date().toISOString()
+                        });
+                        if (error) throw error;
+                    } catch (error) { console.error("Supabase error storing AI pick:", error.message); }
+                }
+            } else {
+                console.warn(`CRITICAL: AI Team ${currentTeam.name} could NOT pick. Overall Pick: ${currentPickIndex + 1}. Avail: ${availablePlayersList.length}`);
+                aiThoughtProcessBox.textContent = `Team ${currentTeam.name} could not make a selection. Skipping pick.`;
+            }
+            currentPickIndex++;
+            if (currentPickIndex < draftOrder.length) {
+                if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+                mainDraftLoopTimeoutId = setTimeout(runDraftPickWithThought, PICK_EXECUTION_DELAY_MS); 
+            } else {
+                await completeDraft();
+            }
+        }
+
+        async function completeDraft() {
+            draftInProgress = false;
+            if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+            mainDraftLoopTimeoutId = null;
+
+            updateStatus(`Draft Complete!`); 
+            aiThoughtProcessBox.textContent = `Draft ${currentDraftId.substring(0,10)} has completed. Configure settings and click "Start Draft" for a new one, or "Reset Draft" to clear board.`;
+            updateCurrentPickInfo(null); 
+            console.log("Draft complete.");
+            clearUserPickTimer(); 
+
+            draftControlsTop.style.display = 'block';
+            draftControlsTop.querySelector('.draft-complete-message').style.display = 'inline';
+            draftControlsBottom.style.display = 'block';
+            draftControlsBottom.querySelector('.draft-complete-message').style.display = 'inline';
+            startDraftButton.style.display = 'inline-block'; 
+            startDraftButton.textContent = 'Start New Draft'; 
+
+            setupDraftBoard(true); // Keep board visible, enable controls
+
+
+            if (supabase && supabaseInitialized) {
+                try {
+                    const { error } = await supabase.from('completed_ai_drafts').insert({
+                        draft_id: currentDraftId, completed_at: new Date().toISOString(), settings: { teams: NUM_TEAMS, rounds: TOTAL_ROUNDS, format: "0.5 PPR, 1QB, 2RB, 2WR, 1TE, 1Flex, 1DST, 4 Bench" }
+                    });
+                    if (error) throw error;
+                } catch (error) { console.error("Supabase error logging completed draft:", error.message); }
+                await calculateAndStorePlatformADP();
+            } else platformADPStatusDiv.textContent = "Supabase not configured/initialized. Platform ADP not updated.";
+        }
+        
+        function resetToPreDraftState() {
+            console.log("Resetting to pre-draft state.");
+            draftInProgress = false; 
+            if (mainDraftLoopTimeoutId) clearTimeout(mainDraftLoopTimeoutId);
+            mainDraftLoopTimeoutId = null;
+            clearUserPickTimer();
+            // userControlledTeamId = null; // Optionally clear user control, or let it persist
+            
+            // Re-initialize teams with default names and random strategies for a full reset feel
+            teams = [];
+            for (let i = 0; i < NUM_TEAMS; i++) {
+                teams.push({
+                    id: `team-${i + 1}`,
+                    name: `Team ${i + 1}`, 
+                    roster: [],
+                    strategy: strategyNames[Math.floor(Math.random() * strategyNames.length)]
+                });
+            }
+            userControlledTeamId = null; // Also clear user control on reset
+
+            setupDraftBoard(true); // Enable all controls, clear visual picks from board cells
+            
+            // Reset available players list from master pool
+            availablePlayersList = JSON.parse(JSON.stringify(masterPlayerPool));
+            availablePlayersList.sort((a,b) => a.adp - b.adp);
+            updateAvailablePlayersDisplay(); 
+            
+            draftStatusDiv.textContent = 'Select your team (optional) and strategies, then click "Start Draft".';
+            aiThoughtProcessBox.textContent = 'Configure your draft settings.';
+            aiThoughtProcessBox.style.display = 'block'; 
+            currentPickInfoDiv.textContent = '';
+            pickTimerDisplay.style.display = 'none';
+            
+            draftControlsTop.style.display = 'none'; 
+            draftControlsTop.querySelector('.draft-complete-message').style.display = 'none';
+            draftControlsBottom.style.display = 'none';
+            draftControlsBottom.querySelector('.draft-complete-message').style.display = 'none';
+            startDraftButton.textContent = 'Start Draft'; 
+            startDraftButton.style.display = 'inline-block';
+
+            document.querySelector('.draft-board-container').style.display = 'block';
+            draftBoardGrid.style.display = 'flex';
+            draftViewElements.style.display = 'grid';
+            console.log("UI reset to pre-draft configuration state.");
+        }
+
+
+        async function calculateAndStorePlatformADP() {
+            if (!supabase || !supabaseInitialized) {
+                platformADPStatusDiv.textContent = "Supabase not available. Cannot calculate platform ADP."; return;
+            }
+            platformADPStatusDiv.textContent = "Calculating platform ADP from all stored drafts...";
+            const platformAdpData = {};
+            try {
+                let { data: picks, error } = await supabase.from('draft_picks').select('player_sleeper_id, player_name, player_position, player_team, is_rookie, pick_number_overall');
+                if (error) throw error;
+                if (!picks || picks.length === 0) { 
+                     platformADPStatusDiv.textContent = "No pick data found to calculate platform ADP."; return;
+                }
+                picks.forEach(pick => {
+                    if (!pick.player_sleeper_id) return; 
+                    if (!platformAdpData[pick.player_sleeper_id]) {
+                        platformAdpData[pick.player_sleeper_id] = {
+                            sumPicks: 0, count: 0, name: pick.player_name, position: pick.player_position, team: pick.player_team, isRookie: pick.is_rookie
+                        };
+                    }
+                    platformAdpData[pick.player_sleeper_id].sumPicks += pick.pick_number_overall;
+                    platformAdpData[pick.player_sleeper_id].count++;
+                });
+                const adpUpserts = [];
+                for (const playerId in platformAdpData) {
+                    const data = platformAdpData[playerId];
+                    const calculatedADP = data.sumPicks / data.count;
+                    adpUpserts.push({
+                        player_sleeper_id: playerId, player_name: data.name, player_position: data.position, player_team: data.team, is_rookie: data.isRookie, total_times_drafted: data.count, sum_of_pick_numbers: data.sumPicks, calculated_platform_adp: parseFloat(calculatedADP.toFixed(2)), last_updated: new Date().toISOString()
+                    });
+                }
+                if (adpUpserts.length > 0) {
+                    const { error: upsertError } = await supabase.from('player_platform_adp').upsert(adpUpserts, { onConflict: 'player_sleeper_id' });
+                    if (upsertError) throw upsertError;
+                    console.log(`Platform ADP updated for ${adpUpserts.length} players.`);
+                    platformADPStatusDiv.textContent = `Platform ADP updated at ${new Date().toLocaleTimeString()}.`;
+                } else {
+                    platformADPStatusDiv.textContent = "No data to update platform ADP.";
+                }
+            } catch (error) {
+                console.error("Supabase error calculating/storing platform ADP:", error.message);
+                platformADPStatusDiv.textContent = `Error updating platform ADP: ${error.message}`;
+            }
+        }
+
+        // --- MAIN APPLICATION LOGIC & SETUP ---
+        async function initialDataLoadAndSetup() {
+            console.log("initialDataLoadAndSetup called.");
+            hideGlobalError(); 
+            loadingOverlay.style.display = 'flex';
+            loadingStatusText.textContent = 'Loading initial data...';
+            
+            try {
+                const sleeperPlayers = await fetchSleeperPlayers();
+                const processedAdpData = processHardcodedAdp(hardcodedRawAdpArray); 
+                masterPlayerPool = mergePlayerData(sleeperPlayers, processedAdpData);
+                
+                if (masterPlayerPool.length < NUM_TEAMS * TOTAL_ROUNDS) {
+                     console.warn(`Warning: Master player pool size (${masterPlayerPool.length}) is less than total picks required for a full draft.`);
+                }
+
+                console.log("Data processing complete. Ready for user to start first draft.");
+                loadingStatusText.textContent = 'Player Data Loaded.';
+                draftStatusDiv.textContent = 'Select your team (optional) and strategies, then click "Start Draft".'; 
+                
+                teams = []; 
+                 for (let i = 0; i < NUM_TEAMS; i++) {
+                    teams.push({
+                        id: `team-${i + 1}`,
+                        name: `Team ${i + 1}`, 
+                        roster: [],
+                        strategy: strategyNames[Math.floor(Math.random() * strategyNames.length)]
+                    });
+                }
+                setupDraftBoard(true); 
+                
+                document.querySelector('.draft-board-container').style.display = 'block'; 
+                draftBoardGrid.style.display = 'flex';
+                aiThoughtProcessBox.style.display = 'block'; 
+                aiThoughtProcessBox.textContent = 'Select a team to control (optional) using the radio buttons above each team column. Then, set AI strategies for other teams. Click "Start Draft" when ready.';
+                draftViewElements.style.display = 'grid'; 
+                updateAvailablePlayersDisplay(); 
+                startDraftButton.style.display = 'inline-block'; 
+                loadingOverlay.style.display = 'none';
+
+            } catch (error) {
+                console.error("Error during initial data loading or processing:", error.message);
+                displayGlobalError(`Error during data setup: ${error.message}`); 
+                loadingOverlay.style.display = 'none'; 
+            }
+        }
+
+
+        function mainAppUILogic() {
+            positionFilter.addEventListener('change', () => {
+                if (masterPlayerPool.length > 0) { 
+                    updateAvailablePlayersDisplay()
+                }
+            });
+
+            startDraftButton.addEventListener('click', () => {
+                initializeNewDraft();
+            });
+            resetDraftButtonTop.addEventListener('click', () => resetToPreDraftState());
+            resetDraftButtonBottom.addEventListener('click', () => resetToPreDraftState());
+            
+            draftSelectedPlayerButton.addEventListener('click', () => {
+                if (selectedPlayerForUserDraft && userControlledTeamId && draftOrder[currentPickIndex]?.id === userControlledTeamId) {
+                    clearInterval(userPickTimerInterval); 
+                    executeUserOrAutoPick(selectedPlayerForUserDraft, false);
+                }
+            });
+            
+            draftStatusDiv.textContent = 'Loading Player Data...'; 
+            loadingOverlay.style.display = 'flex'; 
+            document.querySelector('.draft-board-container').style.display = 'none';
+            draftBoardGrid.style.display = 'none';
+            aiThoughtProcessBox.style.display = 'none';
+            draftViewElements.style.display = 'none';
+            draftControlsTop.style.display = 'none';
+            draftControlsBottom.style.display = 'none';
+            startDraftButton.style.display = 'none';
+
+            initialDataLoadAndSetup(); 
+        }
+
+        // --- SCRIPT ENTRY POINT ---
+        let appLogicHasBeenSetup = false;
+
+        function trySetupApp() {
+            if (appLogicHasBeenSetup) {
+                return; 
+            }
+            appLogicHasBeenSetup = true; 
+
+            console.log("trySetupApp called. Checking Supabase library status...");
+            
+            if (window.supabaseClientLoaded === true && typeof window.supabaseJs === 'object' && typeof window.supabaseJs.createClient === 'function') {
+                console.log("Supabase library (supabaseJs) is available. Attempting to create client.");
+                try {
+                    supabase = createSupabaseClientInstance(); 
+                } catch (e) {
+                    console.error("Error during createSupabaseClientInstance call:", e);
+                    supabaseInitialized = false; 
+                }
+            } else {
+                const libStatusMsg = `window.supabaseClientLoaded = ${window.supabaseClientLoaded}, typeof window.supabaseJs = ${typeof window.supabaseJs}`;
+                console.warn(`Supabase library not ready. ${libStatusMsg}`);
+                if (!SUPABASE_URL || SUPABASE_URL === 'YOUR_SUPABASE_URL' || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                     console.warn("Supabase URL/Key not configured. DB features disabled.");
+                } else {
+                     console.warn("Supabase library failed to load, but URL/Keys seem configured. DB features disabled.");
+                }
+                supabaseInitialized = false;
+            }
+            
+            mainAppUILogic(); 
+        }
+        
+        document.addEventListener('supabaseLibraryReady', () => {
+            console.log('Custom "supabaseLibraryReady" event received.');
+            if (!appLogicHasBeenSetup) trySetupApp();
+        });
+
+        document.addEventListener('supabaseLibraryFailed', () => {
+            console.error('Custom "supabaseLibraryFailed" event received.');
+             if (!appLogicHasBeenSetup) trySetupApp(); 
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded event fired.');
+            setTimeout(() => {
+                if (!appLogicHasBeenSetup) {
+                    console.log('Calling trySetupApp from DOMContentLoaded fallback.');
+                    trySetupApp();
+                }
+            }, 700); 
+        });
+
+    </script>
+</body>
+</html>
+
