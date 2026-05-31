@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach's Notebook — Newsletter</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#04140d;--neon-lime:#c6ff00;--neon-cyan:#00f0ff;--neon-pink:#ff2d95;--neon-orange:#ff8a00;
+    --text:#eafff2;--muted:#7fc6a3;--card:rgba(255,255,255,0.04);--good:#00ff9d;--bad:#ff4d6d;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:#02100a;color:var(--text);min-height:100vh;padding:34px 14px;
+    display:flex;flex-direction:column;align-items:center;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 0%,rgba(198,255,0,.14),transparent 45%),
+    radial-gradient(circle at 90% 100%,rgba(0,240,255,.14),transparent 45%),#02100a}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-lime);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:var(--card);border:1px solid rgba(198,255,0,.4);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+  .label{position:relative;z-index:2;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:#fff;text-transform:uppercase;margin-bottom:18px;opacity:.8}
+
+  .doc{position:relative;z-index:2;width:660px;max-width:100%;background:linear-gradient(180deg,#06180f,#04101a);
+    border:1px solid rgba(255,255,255,.14);border-radius:20px;overflow:hidden;backdrop-filter:blur(20px);
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 50px rgba(198,255,0,.08)}
+  .head{padding:28px 30px 22px;border-bottom:1px dashed rgba(255,255,255,.14);position:relative;overflow:hidden}
+  .head::after{content:"";position:absolute;top:-50px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(198,255,0,.18),transparent 70%)}
+  .head .e{font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.3em;color:var(--neon-cyan);text-transform:uppercase}
+  .head h1{font-family:'Archivo Black',sans-serif;font-size:2.1rem;text-transform:uppercase;margin:8px 0 4px;line-height:.95;
+    background:linear-gradient(92deg,var(--neon-lime),var(--neon-cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .head .sub{font-size:.8rem;color:var(--muted)}
+
+  /* scoreboard strip */
+  .scorestrip{display:flex;border-bottom:1px solid rgba(255,255,255,.1)}
+  .scorestrip .s{flex:1;text-align:center;padding:16px 8px;border-right:1px solid rgba(255,255,255,.06)}
+  .scorestrip .s:last-child{border-right:0}
+  .scorestrip .s b{font-family:'Archivo Black',sans-serif;font-size:1.7rem;display:block;line-height:1}
+  .scorestrip .s small{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .s.win b{color:var(--good)} .s.pts b{color:var(--neon-cyan)} .s.saves b{color:var(--neon-lime)} .s.streak b{color:var(--neon-orange)}
+
+  .body{padding:24px 30px}
+  .secttl{font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--neon-lime);
+    margin:6px 0 14px;display:flex;align-items:center;gap:10px}
+  .secttl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(198,255,0,.5),transparent)}
+
+  /* ledger of nudges */
+  .ledger{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden;margin-bottom:24px}
+  .lrow{display:grid;grid-template-columns:64px 1fr auto;gap:10px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06);align-items:center}
+  .lrow:last-child{border-bottom:0}
+  .lrow .dt{font-size:.68rem;color:var(--muted)}
+  .lrow .ev{font-size:.82rem;font-family:'Space Grotesk',sans-serif}
+  .lrow .ev b{color:var(--neon-cyan)}
+  .lrow .out{font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.06em;padding:5px 9px;border-radius:7px;text-transform:uppercase;white-space:nowrap}
+  .out.saved{background:rgba(0,255,157,.16);color:var(--good);border:1px solid var(--good)}
+  .out.win{background:rgba(198,255,0,.16);color:var(--neon-lime);border:1px solid var(--neon-lime)}
+  .out.miss{background:rgba(255,77,109,.14);color:var(--bad);border:1px solid var(--bad)}
+
+  /* call of the week */
+  .cotw{background:linear-gradient(135deg,rgba(0,240,255,.1),rgba(198,255,0,.08));border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:20px;margin-bottom:24px;position:relative;overflow:hidden}
+  .cotw .ribbon{font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.14em;color:#02100a;background:var(--neon-lime);display:inline-block;padding:5px 12px;border-radius:999px;text-transform:uppercase;margin-bottom:10px}
+  .cotw h3{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:8px}
+  .cotw p{font-size:.9rem;color:#cdeede;line-height:1.55}
+  .cotw p b{color:var(--neon-lime)}
+  .cotw .quote{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--neon-cyan);background:rgba(0,0,0,.35);border-radius:10px;padding:11px 14px;margin-top:12px;border-left:3px solid var(--neon-cyan)}
+
+  /* week ahead */
+  .ahead{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+  .acard{background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px}
+  .acard .t{font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-orange);margin-bottom:6px}
+  .acard .nm{font-weight:800;font-size:1rem}
+  .acard .d{font-size:.78rem;color:var(--muted);margin-top:3px;line-height:1.4}
+
+  .footer{background:#03130c;border-top:1px dashed rgba(255,255,255,.14);text-align:center;padding:22px;font-size:.74rem;color:var(--muted)}
+  .footer .cta{display:inline-block;margin-bottom:12px;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--neon-lime);color:#02100a;padding:10px 18px;border-radius:10px;text-decoration:none}
+  .footer a.mb{color:var(--neon-lime);text-decoration:none;font-family:'Bungee',sans-serif;letter-spacing:.1em;display:block;margin-top:10px}
+  .note{position:relative;z-index:2;color:var(--muted);font-size:.78rem;margin-top:22px;max-width:660px;text-align:center}
+  .note b{color:var(--neon-cyan)}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="label">Brief 2 · Newsletter</div>
+
+<div class="doc">
+  <div class="head">
+    <div class="e">Meatbag Made · Coach in Your Pocket</div>
+    <h1>Coach's Notebook</h1>
+    <div class="sub">Your week, reviewed · Couch Potatoes · Week 11 wrap</div>
+  </div>
+
+  <div class="scorestrip">
+    <div class="s win"><b>W</b><small>Result 118–104</small></div>
+    <div class="s pts"><b>118.6</b><small>Points for</small></div>
+    <div class="s saves"><b>3</b><small>Coach saves</small></div>
+    <div class="s streak"><b>2</b><small>Win streak</small></div>
+  </div>
+
+  <div class="body">
+    <div class="secttl">Every nudge I sent you</div>
+    <div class="ledger">
+      <div class="lrow"><span class="dt">Sun 9:02a</span><span class="ev">Flagged <b>Rashee Rice OUT</b> overnight — proposed Jennings into your flex</span><span class="out saved">Saved</span></div>
+      <div class="lrow"><span class="dt">Sun 10:54a</span><span class="ev">You asked <b>Hall or Pollard</b> — I said Hall</span><span class="out win">+9.7 pts</span></div>
+      <div class="lrow"><span class="dt">Sun 11:48a</span><span class="ev">Last-second alert: <b>Texans D/ST</b> facing a backup QB, slotted them in</span><span class="out win">+6 pts</span></div>
+      <div class="lrow"><span class="dt">Wed 7:30p</span><span class="ev">Told you to hold <b>Bijan</b> when the chat was panicking</span><span class="out saved">Dodged</span></div>
+      <div class="lrow"><span class="dt">Thu 8:15p</span><span class="ev">Suggested you DON'T chase the Thursday WR streamer</span><span class="out miss">Coin flip</span></div>
+    </div>
+
+    <div class="secttl">Call of the week</div>
+    <div class="cotw">
+      <div class="ribbon">★ The save that won it</div>
+      <h3>Jennings over a ruled-out Rice</h3>
+      <p>You were down to your last roster spot at flex when Rice got the late scratch. The swap to <b>Jauan Jennings</b> netted <b>+14.2</b> where you'd have scored a zero. Final margin: 14 points. That one move was the game.</p>
+      <div class="quote">› you: "yeah, just set my lineup"<br>› coach: locked. swapped Jennings in for Rice. you're optimized.</div>
+    </div>
+
+    <div class="secttl">What I'm watching for you next week</div>
+    <div class="ahead">
+      <div class="acard"><div class="t">Buy</div><div class="nm">Tyjae Spears</div><div class="d">Pollard's ankle is real. Get ahead of it — $11 FAAB.</div></div>
+      <div class="acard"><div class="t">Sell</div><div class="nm">Zay Flowers</div><div class="d">Target share sliding 3 weeks. Trade while the name still sells.</div></div>
+      <div class="acard"><div class="t">Start</div><div class="nm">Nico Collins</div><div class="d">Smash spot vs a banged-up Titans secondary.</div></div>
+      <div class="acard"><div class="t">Watch</div><div class="nm">Your QB</div><div class="d">Hurts on a short week — I'll ping you Thursday if it shifts.</div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a class="cta" href="#">Text Coach a question →</a>
+    <div>You value floor over ceiling and you hate kickers. I remember. — Coach</div>
+    <a class="mb" href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a>
+  </div>
+</div>
+
+<p class="note">A weekly receipt of the Coach's work — <b>every nudge, every save</b>, the call that won your week, and what it's watching next.</p>
+</body>
+</html>

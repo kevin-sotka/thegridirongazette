@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 9AM Brief — Newsletter</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1a0b2e;--paper:#fdf6e3;--neon-pink:#ff2d95;--neon-cyan:#00b3c4;--neon-lime:#7bb300;
+    --neon-purple:#7c3aed;--accent:#ff2d95;--muted:#6b5b8a;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:#0a0118;min-height:100vh;padding:34px 14px;color:var(--ink);
+    position:relative;display:flex;flex-direction:column;align-items:center}
+  body::before{content:"";position:fixed;inset:0;
+    background:radial-gradient(circle at 20% 10%,rgba(255,45,149,.25),transparent 45%),
+    radial-gradient(circle at 85% 90%,rgba(124,58,237,.3),transparent 45%),#0a0118}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-pink);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,45,149,.5);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+  .label{position:relative;z-index:2;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:#fff;text-transform:uppercase;margin-bottom:18px;opacity:.8}
+
+  /* email client chrome */
+  .mail{position:relative;z-index:2;width:680px;max-width:100%;border-radius:18px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.16)}
+  .mail-top{background:#16082b;padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .dots{display:flex;gap:7px}.dots i{width:12px;height:12px;border-radius:50%;display:block}
+  .dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+  .mail-meta{color:#cdbdf0;font-size:.78rem}
+  .mail-meta b{color:#fff}
+  .subjline{background:#1d0a36;padding:13px 18px;color:#fff;font-size:.92rem;border-bottom:1px solid rgba(255,255,255,.08)}
+  .subjline .from{color:var(--neon-cyan);font-weight:700}
+  .subjline .time{float:right;color:var(--muted);font-size:.78rem}
+
+  /* the actual newsletter — paper feel */
+  .paper{background:var(--paper);padding:0;position:relative}
+  .masthead{background:var(--ink);color:var(--paper);text-align:center;padding:26px 24px 22px;position:relative;overflow:hidden}
+  .masthead::after{content:"";position:absolute;inset:0;opacity:.4;
+    background-image:linear-gradient(rgba(255,45,149,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(0,179,196,.5) 1px,transparent 1px);background-size:26px 26px;
+    mask-image:radial-gradient(circle at 50% 50%,#000,transparent 75%)}
+  .masthead .e{position:relative;font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.34em;color:var(--neon-cyan);text-transform:uppercase}
+  .masthead h1{position:relative;font-family:'Archivo Black',sans-serif;font-size:2.5rem;text-transform:uppercase;line-height:.9;margin:8px 0;
+    background:linear-gradient(92deg,var(--neon-pink),#ffd000 60%,var(--neon-cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .masthead .dl{position:relative;font-size:.74rem;color:#c9b8ee;letter-spacing:.1em;text-transform:uppercase}
+
+  .body{padding:26px 30px 10px}
+  .greet{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--ink);margin-bottom:4px}
+  .lede{color:var(--muted);font-size:.92rem;margin-bottom:22px;line-height:1.5}
+  .lede b{color:var(--accent)}
+
+  .item{border-left:5px solid var(--accent);padding:4px 0 4px 16px;margin-bottom:22px}
+  .item:nth-child(2){border-color:var(--neon-cyan)}
+  .item .hd{font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .item:nth-child(2) .hd{color:var(--neon-cyan)}
+  .item .hd .n{background:var(--ink);color:var(--paper);width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:.78rem}
+  .item h3{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.18rem;color:var(--ink);margin-bottom:5px}
+  .item p{font-size:.9rem;color:#3a2b52;line-height:1.55}
+  .item p b{color:var(--ink)}
+  .pillrow{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .pill{font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:999px}
+  .pill.out{background:#ffd7df;color:#c8003a}
+  .pill.start{background:#e3ffd1;color:#2f6b00}
+  .pill.add{background:#d4f7fb;color:#006978}
+
+  .divider{height:2px;background:repeating-linear-gradient(90deg,var(--ink),var(--ink) 8px,transparent 8px,transparent 16px);margin:6px 0 22px;opacity:.25}
+
+  /* Fantasy for Newbs column */
+  .column{background:linear-gradient(160deg,#1a0b2e,#2a0a4a);color:var(--paper);margin:0 -30px;padding:26px 30px;position:relative;overflow:hidden}
+  .column::before{content:"";position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,45,149,.4),transparent 70%)}
+  .column .tagrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .column .badge{font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
+    background:var(--neon-lime);color:var(--ink);padding:5px 11px;border-radius:999px}
+  .column .deb{font-size:.66rem;color:var(--neon-cyan);letter-spacing:.18em;text-transform:uppercase;font-family:'Bungee',sans-serif}
+  .column h2{font-family:'Archivo Black',sans-serif;font-size:1.7rem;text-transform:uppercase;line-height:.95;margin-bottom:10px;position:relative}
+  .column h2 em{font-style:normal;color:var(--neon-pink)}
+  .column .col-body{font-size:.92rem;line-height:1.6;color:#e8def7;position:relative}
+  .column .col-body p{margin-bottom:11px}
+  .column .col-body b{color:var(--neon-lime)}
+  .column .pq{font-family:'DM Serif Display',serif;font-size:1.15rem;color:#fff;border-left:3px solid var(--neon-pink);padding-left:14px;margin:14px 0;font-style:italic}
+  .readmore{display:inline-block;margin-top:8px;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink);background:var(--neon-cyan);padding:9px 16px;border-radius:10px;text-decoration:none}
+
+  .footer{background:var(--ink);color:#b9aee0;text-align:center;padding:22px;font-size:.74rem}
+  .footer .vt{margin-bottom:10px;font-size:.7rem;color:#cdbdf0}
+  .footer .vt b{color:var(--neon-lime)}
+  .footer a{color:var(--neon-lime);text-decoration:none;font-family:'Bungee',sans-serif;letter-spacing:.1em}
+  .footer .unsub{display:block;margin-top:10px;font-size:.66rem;color:#6b5b8a}
+  .note{position:relative;z-index:2;color:#b9aee0;font-size:.78rem;margin-top:22px;max-width:680px;text-align:center}
+  .note b{color:var(--neon-pink)}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="label">Brief 1 · Newsletter</div>
+
+<div class="mail">
+  <div class="mail-top">
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div class="mail-meta"><b>Inbox</b> · The Gridiron Gazette</div>
+  </div>
+  <div class="subjline">
+    <span class="from">The 9AM Brief</span> — Your 3 things, Week 11 ☕
+    <span class="time">Sun 9:00 AM</span>
+  </div>
+
+  <div class="paper">
+    <div class="masthead">
+      <div class="e">Meatbag Made presents</div>
+      <h1>The 9AM Brief</h1>
+      <div class="dl">Couch Potatoes League · Week 11 · Sunday, Nov 16</div>
+    </div>
+
+    <div class="body">
+      <div class="greet">Morning, Kevin. 60 seconds — go.</div>
+      <p class="lede">You're <b>6–4</b> and starting today as a slight favorite. Three things stand between you and a clean win. No links, no tables, no homework.</p>
+
+      <div class="item">
+        <div class="hd"><span class="n">1</span> Someone got hurt overnight</div>
+        <h3>Rashee Rice is OUT. He was in your flex.</h3>
+        <p>Ruled out late last night with a knee. <b>Do not leave him in your lineup.</b> Njoku's a game-time call but the beat expects him to play — leave him be.</p>
+        <div class="pillrow"><span class="pill out">Rice — OUT</span><span class="pill out">Njoku — Questionable</span></div>
+      </div>
+
+      <div class="item">
+        <div class="hd"><span class="n">2</span> The one start/sit we'd flip</div>
+        <h3>Start Jauan Jennings over the empty Rice slot.</h3>
+        <p>He's sitting on your bench drawing a soft Cardinals slot corner. Cleanest 14-point floor available to you. That's the whole decision — <b>flip it and move on.</b></p>
+        <div class="pillrow"><span class="pill start">Start: Jennings (proj 14.2)</span></div>
+      </div>
+
+      <div class="item">
+        <div class="hd"><span class="n">3</span> Your one waiver pickup</div>
+        <h3>Spend $11 FAAB on Tyjae Spears.</h3>
+        <p>Pollard's ankle is barking; Spears out-touched him last week. He plugs <b>your</b> RB2 hole better than anyone left in your league. Don't overthink the bid.</p>
+        <div class="pillrow"><span class="pill add">Add: Spears · $11 FAAB</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="column">
+        <div class="tagrow">
+          <span class="badge">New Column</span>
+          <span class="deb">Debut · Issue No. 1</span>
+        </div>
+        <h2>Fantasy for <em>Newbs</em></h2>
+        <div class="col-body">
+          <p>Welcome to your first season. Here's the secret the grinders won't tell you: <b>you do not need to read ten articles a week to win.</b> You need to do three small things well, and then go live your life.</p>
+          <p class="pq">"Most leagues aren't won on Thursday night. They're lost on Sunday morning, by people who forgot to check who's hurt."</p>
+          <p>Rule one — <b>check inactives before kickoff.</b> That's it. Half your league won't, and you'll quietly pass them. Rule two — <b>start your studs, even in bad matchups.</b> Benching a stud to chase a hunch is how newbs lose. Rule three — <b>play the waiver wire, not the headlines.</b> The guy trending on Twitter is already rostered in your league. The guy who actually helps you is the boring one nobody's tweeting about.</p>
+          <p>Do those three things and you'll beat people who've been doing this for a decade. We'll handle the rest — that's what this brief is for.</p>
+          <a class="readmore" href="#">Read the full column →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="vt">Voice: <b>Friend Who Just Knows</b> · change anytime to Coach or Beat Reporter</div>
+      <a href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a>
+      <span class="unsub">You're getting this because you connected your Sleeper league · Manage delivery · Unsubscribe</span>
+    </div>
+  </div>
+</div>
+
+<p class="note">Same 3-thing intel as the app, reformatted as a <b>60-second email</b> — and carrying the debut <b>"Fantasy for Newbs"</b> column.</p>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sunday Drop — App</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#04101a;--neon-cyan:#00f0ff;--neon-pink:#ff2d95;--neon-lime:#c6ff00;
+    --neon-purple:#a259ff;--text:#eafaff;--muted:#8fb6c8;--glass:rgba(255,255,255,0.05);
+    --good:#00ffa3;--warn:#ffb800;--bad:#ff4d6d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:36px 16px;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;
+    background:radial-gradient(circle at 20% 0%,rgba(0,240,255,.18),transparent 45%),
+    radial-gradient(circle at 90% 100%,rgba(255,45,149,.18),transparent 45%),
+    linear-gradient(180deg,#04101a,#0a0420)}
+  .topbar{position:relative;z-index:2;text-align:center;margin-bottom:26px}
+  .topbar .k{font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:var(--neon-cyan);text-transform:uppercase}
+  .topbar h1{font-family:'Archivo Black',sans-serif;font-size:1.8rem;text-transform:uppercase;
+    background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-cyan);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:var(--glass);border:1px solid rgba(0,240,255,.4);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+
+  /* phone frame */
+  .phone{position:relative;z-index:2;width:390px;max-width:100%;border-radius:46px;
+    background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.18);padding:14px;backdrop-filter:blur(22px);
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(0,240,255,.12)}
+  .screen{background:linear-gradient(180deg,#06121d,#0b0526);border-radius:34px;overflow:hidden;height:780px;display:flex;flex-direction:column;position:relative}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#000;border-radius:999px;z-index:5}
+  .statusbar{display:flex;justify-content:space-between;padding:14px 24px 6px;font-size:.72rem;color:var(--muted);font-weight:700}
+  .appbar{padding:6px 20px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .logo-dot{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,var(--neon-cyan),var(--neon-pink));display:grid;place-items:center;font-size:1.1rem}
+  .appbar .nm{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:-.01em}
+  .appbar .nm small{display:block;font-weight:400;font-size:.66rem;color:var(--muted);letter-spacing:.04em}
+
+  .scroll{flex:1;overflow-y:auto;padding:18px 18px 90px}
+  .scroll::-webkit-scrollbar{width:0}
+  .hero{background:linear-gradient(135deg,rgba(0,240,255,.16),rgba(255,45,149,.12));border:1px solid rgba(255,255,255,.14);
+    border-radius:22px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+  .hero .pulse{position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,.4),transparent 70%)}
+  .hero .when{font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.2em;color:var(--neon-cyan);text-transform:uppercase}
+  .hero h2{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.5rem;margin:6px 0 4px;line-height:1.05}
+  .hero p{font-size:.84rem;color:var(--muted)}
+  .voice-pill{margin-top:12px;display:inline-flex;align-items:center;gap:7px;font-size:.72rem;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 12px}
+  .voice-pill b{color:var(--neon-lime)}
+
+  .block{background:var(--glass);border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:16px;margin-bottom:14px}
+  .block .lab{display:flex;align-items:center;gap:8px;font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px}
+  .num{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:.8rem;color:#04101a;font-weight:800}
+  .n1{background:var(--bad)}.n2{background:var(--neon-cyan)}.n3{background:var(--neon-lime)}
+
+  .player{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+  .player:last-child{border-bottom:0}
+  .ava{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#1b3a4a,#2a1640);display:grid;place-items:center;font-weight:800;font-size:.8rem;color:var(--neon-cyan);flex-shrink:0}
+  .pinfo{flex:1;min-width:0}
+  .pinfo .pn{font-weight:700;font-size:.92rem}
+  .pinfo .meta{font-size:.72rem;color:var(--muted)}
+  .tag{font-size:.62rem;font-family:'Bungee',sans-serif;letter-spacing:.06em;padding:4px 9px;border-radius:8px;text-transform:uppercase;flex-shrink:0}
+  .tag.out{background:rgba(255,77,109,.18);color:var(--bad);border:1px solid var(--bad)}
+  .tag.q{background:rgba(255,184,0,.16);color:var(--warn);border:1px solid var(--warn)}
+
+  .swap{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .swap .col{flex:1;text-align:center;background:rgba(0,0,0,.3);border-radius:14px;padding:12px 8px}
+  .swap .col.in{border:1.5px solid var(--good);box-shadow:0 0 18px rgba(0,255,163,.25)}
+  .swap .col.outc{opacity:.6;border:1px solid rgba(255,255,255,.1)}
+  .swap .col .lbl{font-family:'Bungee',sans-serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .swap .col .nm2{font-weight:800;font-size:.95rem;margin:4px 0}
+  .swap .col .proj{font-size:.72rem;color:var(--neon-lime)}
+  .swap .arrow{font-size:1.4rem;color:var(--neon-cyan)}
+  .reason{font-size:.78rem;color:var(--muted);margin-top:10px;line-height:1.45;background:rgba(0,240,255,.06);border-left:2px solid var(--neon-cyan);padding:8px 10px;border-radius:0 10px 10px 0}
+
+  .waiver{display:flex;align-items:center;gap:12px}
+  .waiver .pct{margin-left:auto;text-align:right}
+  .waiver .pct b{font-family:'Archivo Black',sans-serif;font-size:1.3rem;color:var(--neon-lime);display:block;line-height:1}
+  .waiver .pct small{font-size:.6rem;color:var(--muted)}
+  .faab{margin-top:12px;display:flex;align-items:center;gap:10px;font-size:.78rem}
+  .faab .bar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .faab .bar i{display:block;height:100%;width:18%;background:linear-gradient(90deg,var(--neon-lime),var(--neon-cyan))}
+
+  /* share card */
+  .sharecard{margin-top:6px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.14);
+    background:linear-gradient(135deg,#1a0033,#003344);position:relative}
+  .sharecard .grid-bg{position:absolute;inset:0;opacity:.3;
+    background-image:linear-gradient(rgba(255,45,149,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.4) 1px,transparent 1px);background-size:22px 22px}
+  .sharecard .inner{position:relative;padding:18px}
+  .sharecard .hd{font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.2em;color:var(--neon-cyan);text-transform:uppercase}
+  .sharecard .big{font-family:'Archivo Black',sans-serif;font-size:1.35rem;line-height:1.05;text-transform:uppercase;margin:8px 0;
+    background:linear-gradient(90deg,var(--neon-lime),var(--neon-cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sharecard .vs{font-size:.82rem;color:#fff}
+  .sharecard .foot{margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:.6rem;color:var(--muted)}
+  .sharebtns{display:flex;gap:8px;margin-top:12px}
+  .sharebtns button{flex:1;border:0;border-radius:12px;padding:11px;font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+  .sb1{background:var(--neon-lime);color:#04101a}
+  .sb2{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.18)}
+
+  .tabbar{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-around;padding:14px 10px 22px;
+    background:linear-gradient(180deg,transparent,#06121d 40%);backdrop-filter:blur(8px)}
+  .tabbar .t{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.58rem;color:var(--muted)}
+  .tabbar .t.on{color:var(--neon-cyan)}
+  .tabbar .t .ic{font-size:1.2rem}
+  .note{position:relative;z-index:2;color:var(--muted);font-size:.78rem;margin-top:22px;max-width:390px;text-align:center}
+  .mb{margin-top:16px;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .mb a{color:var(--neon-lime);text-decoration:none}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="topbar">
+  <div class="k">Brief 1 · App</div>
+  <h1>The Sunday Drop</h1>
+</div>
+
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:00</span><span>5G &nbsp; 100%</span></div>
+    <div class="appbar">
+      <div class="logo-dot">🏈</div>
+      <div class="nm">The Sunday Drop<small>Couch Potatoes · Week 11 · PPR</small></div>
+    </div>
+
+    <div class="scroll">
+      <div class="hero">
+        <div class="pulse"></div>
+        <div class="when">Sunday · 9:00 AM · delivered</div>
+        <h2>Good morning, Kevin.<br>3 things before kickoff.</h2>
+        <p>You're 6–4, sitting 4th. Win today and you're in the hunt for a bye.</p>
+        <span class="voice-pill">Voice: <b>Friend Who Just Knows</b></span>
+      </div>
+
+      <div class="block">
+        <div class="lab"><span class="num n1">!</span> Who's hurt / downgraded</div>
+        <div class="player">
+          <div class="ava">RR</div>
+          <div class="pinfo"><div class="pn">Rashee Rice</div><div class="meta">WR · KC · ruled out overnight (knee)</div></div>
+          <span class="tag out">OUT</span>
+        </div>
+        <div class="player">
+          <div class="ava">DA</div>
+          <div class="pinfo"><div class="pn">David Njoku</div><div class="meta">TE · CLE · limited, game-time call</div></div>
+          <span class="tag q">QUES</span>
+        </div>
+        <div class="reason">Rice was in your flex. You need a body there — see the swap below. Njoku's fine to start; the beat says he plays.</div>
+      </div>
+
+      <div class="block">
+        <div class="lab"><span class="num n2">2</span> The one call we'd flip</div>
+        <div class="swap">
+          <div class="col outc">
+            <div class="lbl">Sit</div>
+            <div class="nm2">Rashee Rice</div>
+            <div class="proj" style="color:var(--bad)">OUT</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="col in">
+            <div class="lbl">Start</div>
+            <div class="nm2">Jauan Jennings</div>
+            <div class="proj">proj 14.2</div>
+          </div>
+        </div>
+        <div class="reason">Jennings is on your bench and draws a soft Cardinals slot corner. With Rice out, he's your cleanest flex. One tap below sets it.</div>
+        <div class="sharebtns" style="margin-top:14px">
+          <button class="sb1">✓ Set this lineup</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="lab"><span class="num n3">3</span> Your highest-leverage waiver</div>
+        <div class="waiver">
+          <div class="ava" style="color:var(--neon-lime)">TB</div>
+          <div class="pinfo"><div class="pn">Tyjae Spears</div><div class="meta">RB · TEN · 62% rostered · trending ↑</div></div>
+          <div class="pct"><b>+18%</b><small>win prob</small></div>
+        </div>
+        <div class="reason">Pollard's ankle is barking and Spears out-touched him last week. He fits YOUR hole at RB2 better than anyone available in your league.</div>
+        <div class="faab">
+          <span>Bid:</span><div class="bar"><i></i></div><b style="color:var(--neon-lime)">$11 FAAB</b>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="lab" style="color:var(--neon-pink)">📤 Brag / argue in the group chat</div>
+        <div class="sharecard">
+          <div class="grid-bg"></div>
+          <div class="inner">
+            <div class="hd">Couch Potatoes · Week 11</div>
+            <div class="big">Kevin is benching<br>a dead man</div>
+            <div class="vs">Started Jennings over a ruled-OUT Rice. Galaxy brain or just read the texts?</div>
+            <div class="foot"><span>THE SUNDAY DROP</span><span>◆ shareable card</span></div>
+          </div>
+        </div>
+        <div class="sharebtns">
+          <button class="sb1">Send to chat</button>
+          <button class="sb2">Save image</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <div class="t on"><span class="ic">📨</span>Drop</div>
+      <div class="t"><span class="ic">📊</span>Team</div>
+      <div class="t"><span class="ic">🔁</span>Waivers</div>
+      <div class="t"><span class="ic">⚙️</span>Voice</div>
+    </div>
+  </div>
+</div>
+
+<p class="note">Two features in focus: the <b style="color:var(--neon-cyan)">3-thing Sunday brief</b> (inactives → one start/sit → one waiver) and the <b style="color:var(--neon-pink)">auto-generated group-chat share card</b>.</p>
+<div class="mb"><a href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a></div>
+</body>
+</html>

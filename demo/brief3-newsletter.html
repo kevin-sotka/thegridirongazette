@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Tuesday Dispatch — Newsletter</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700;900&family=Bungee+Shade&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#13030d;--paper:#fbf3e8;--neon-pink:#e0117a;--neon-orange:#e06a00;--neon-cyan:#0090a8;--gold:#c79100;--muted:#7a5d6e;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:#0a0118;min-height:100vh;padding:34px 14px;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 80% 5%,rgba(224,106,0,.28),transparent 45%),
+    radial-gradient(circle at 12% 95%,rgba(224,17,122,.3),transparent 45%),#0a0118}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-pink);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:rgba(255,255,255,.06);border:1px solid rgba(224,17,122,.5);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+  .label{position:relative;z-index:2;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:#fff;text-transform:uppercase;margin-bottom:18px;opacity:.85}
+
+  .paper{position:relative;z-index:2;width:720px;max-width:100%;background:var(--paper);border-radius:8px;overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);border:1px solid rgba(0,0,0,.2)}
+
+  /* newspaper nameplate */
+  .plate{text-align:center;padding:24px 24px 16px;border-bottom:4px double var(--ink);position:relative}
+  .plate .top{display:flex;justify-content:space-between;font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);border-bottom:1px solid rgba(0,0,0,.2);padding-bottom:8px;margin-bottom:12px}
+  .plate h1{font-family:'Bungee Shade',cursive;font-size:3rem;line-height:.85;color:var(--ink);letter-spacing:.01em}
+  .plate .motto{font-family:'Playfair Display',serif;font-style:italic;font-size:.92rem;color:var(--neon-pink);margin-top:8px}
+  .plate .strip{margin-top:12px;background:var(--ink);color:var(--paper);font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;padding:6px;display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+  .plate .strip span{color:var(--gold)}
+
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:0}
+  .lead{padding:22px 24px;border-right:1px solid rgba(0,0,0,.18)}
+  .side{padding:22px 22px}
+
+  .kicker2{font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-orange);margin-bottom:6px}
+  .headline{font-family:'Playfair Display',serif;font-weight:900;font-size:2rem;line-height:1;color:var(--ink);margin-bottom:8px}
+  .byline{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;border-bottom:1px solid rgba(0,0,0,.15);padding-bottom:10px}
+  .byline b{color:var(--neon-pink)}
+  .recap{font-size:.92rem;line-height:1.6;color:#2a1620;column-count:1}
+  .recap p{margin-bottom:11px}
+  .recap p:first-letter{font-family:'Playfair Display',serif;font-weight:900;font-size:2.6rem;float:left;line-height:.8;padding:4px 8px 0 0;color:var(--neon-pink)}
+  .recap b{color:var(--ink)}
+  .pullquote{font-family:'Playfair Display',serif;font-style:italic;font-size:1.15rem;color:var(--ink);border-top:2px solid var(--neon-orange);border-bottom:2px solid var(--neon-orange);padding:12px 0;margin:14px 0;text-align:center}
+
+  /* disaster box */
+  .disaster{background:var(--ink);color:var(--paper);border-radius:10px;padding:16px;margin-bottom:18px;position:relative;overflow:hidden}
+  .disaster::after{content:"💀";position:absolute;bottom:-14px;right:-6px;font-size:4rem;opacity:.18}
+  .disaster .t{font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-pink)}
+  .disaster .w{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.25rem;margin:6px 0;color:var(--gold)}
+  .disaster p{font-size:.82rem;line-height:1.45;color:#e8d6e0;position:relative}
+
+  .scoreboard{border:2px solid var(--ink);border-radius:8px;overflow:hidden;margin-bottom:18px}
+  .scoreboard .sbh{background:var(--ink);color:var(--paper);font-family:'Bungee',sans-serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;padding:7px 12px}
+  .gm{display:flex;justify-content:space-between;padding:9px 12px;border-bottom:1px solid rgba(0,0,0,.1);font-size:.82rem}
+  .gm:last-child{border-bottom:0}
+  .gm .w{font-weight:800}.gm .l{color:var(--muted)}
+  .gm .sc{font-family:'Space Grotesk',sans-serif;font-weight:700}
+
+  .awards-mini .am{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed rgba(0,0,0,.2)}
+  .awards-mini .am:last-child{border-bottom:0}
+  .awards-mini .em{font-size:1.4rem}
+  .awards-mini .tt{font-family:'Bungee',sans-serif;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;color:var(--neon-orange)}
+  .awards-mini .nm{font-weight:800;font-size:.92rem}
+  .awards-mini .dd{font-size:.74rem;color:var(--muted)}
+
+  .footer{background:var(--ink);color:#d6b6c8;text-align:center;padding:20px;font-size:.74rem;border-top:4px double var(--gold)}
+  .footer .vt{margin-bottom:10px}.footer .vt b{color:var(--gold)}
+  .footer a{color:var(--gold);text-decoration:none;font-family:'Bungee',sans-serif;letter-spacing:.1em}
+  .note{position:relative;z-index:2;color:#d6b6c8;font-size:.78rem;margin-top:22px;max-width:720px;text-align:center}
+  .note b{color:var(--neon-orange)}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}.lead{border-right:0;border-bottom:1px solid rgba(0,0,0,.18)}.plate h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="label">Brief 3 · Newsletter</div>
+
+<div class="paper">
+  <div class="plate">
+    <div class="top"><span>Vol. I · No. 11</span><span>Tuesday Morning Edition</span><span>Voice: Old-Timey Beat Reporter</span></div>
+    <h1>THE TUESDAY DISPATCH</h1>
+    <div class="motto">"The Athletic, but for your league." — Couch Potatoes Fantasy Football, Est. 2026</div>
+    <div class="strip">Week 11 Recap <span>·</span> Power Shuffle <span>·</span> The Disaster <span>·</span> Awards</div>
+  </div>
+
+  <div class="grid">
+    <div class="lead">
+      <div class="kicker2">Game of the Week</div>
+      <div class="headline">Couch Steals One On Schedule's Kindness</div>
+      <div class="byline">By <b>The Dispatch Desk</b> · auto-filed Tue 9:00 AM</div>
+      <div class="recap">
+        <p>It was not pretty, and the box score will tell you so. <b>Kevin's Couch</b> posted the sixth-best total of the week and walked away a winner anyway, drawing the one opponent generous enough to score less — <b>Punt Returns Only</b>, who managed to lose despite a benchful of points.</p>
+        <p>The dagger was a late scratch turned masterstroke: with Rashee Rice ruled out at dawn, the Couch slid <b>Jauan Jennings</b> into the flex for 14.2 where a zero had been waiting. A two-touchdown swing, decided before kickoff, by a manager who simply read the morning report.</p>
+        <div class="pullquote">"Won by 14. The swap was worth 14. You do the math, and then you thank the inactives page."</div>
+        <p>The win nudges the Couch to <b>4th</b> and into genuine bye-week conversation. Boring football, the connoisseur's football. The Dispatch tips its cap.</p>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="disaster">
+        <div class="t">💀 Disaster of the Week</div>
+        <div class="w">Punt Returns Only</div>
+        <p>Left <b>41 points</b> on the bench, started a D/ST on a bye, and lost by three. A performance so complete the league has retired the trophy in its honor. Self-deprecate accordingly — this one's going in the chat whether you post it or not.</p>
+      </div>
+
+      <div class="scoreboard">
+        <div class="sbh">Week 11 Scoreboard</div>
+        <div class="gm"><span><span class="w">Kevin's Couch</span> def. <span class="l">Punt Returns Only</span></span><span class="sc">118–104</span></div>
+        <div class="gm"><span><span class="w">Dynasty Warriors</span> def. <span class="l">Gridiron Goblins</span></span><span class="sc">141–96</span></div>
+        <div class="gm"><span><span class="w">Bijan Mustard</span> def. <span class="l">Waiver Wire Willy</span></span><span class="sc">129–122</span></div>
+        <div class="gm"><span><span class="w">Ravens Madness</span> def. <span class="l">The Bye Week Blues</span></span><span class="sc">110–101</span></div>
+      </div>
+
+      <div class="kicker2">The Hardware</div>
+      <div class="awards-mini">
+        <div class="am"><span class="em">🐂</span><div><div class="tt">The Bell Cow</div><div class="nm">Bijan Mustard</div><div class="dd">Hall's 31.4 carried him, loudly.</div></div></div>
+        <div class="am"><span class="em">🛋️</span><div><div class="tt">Couch Vibes</div><div class="nm">Kevin's Couch</div><div class="dd">Won with the 6th-best score. Luck = skill?</div></div></div>
+        <div class="am"><span class="em">🪦</span><div><div class="tt">Points Left to Die</div><div class="nm">Punt Returns Only</div><div class="dd">41 on the pine. A record.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="vt">Published automatically every Tuesday · Voice: <b>Old-Timey Beat Reporter</b> · Commish can change it anytime</div>
+    <a href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a>
+  </div>
+</div>
+
+<p class="note">The league's own private publication — <b>matchup recaps with attitude</b> and a <b>Disaster of the Week</b> — delivered every Tuesday in the commish's chosen voice.</p>
+</body>
+</html>

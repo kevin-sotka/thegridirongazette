@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coach — App</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#031a12;--neon-lime:#c6ff00;--neon-cyan:#00f0ff;--neon-pink:#ff2d95;
+    --text:#eafff2;--muted:#84c9a8;--glass:rgba(255,255,255,0.05);--coach:#0a2a1d;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:36px 16px;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;
+    background:radial-gradient(circle at 80% 0%,rgba(198,255,0,.16),transparent 45%),
+    radial-gradient(circle at 10% 100%,rgba(0,240,255,.16),transparent 45%),linear-gradient(180deg,#031a12,#04101a)}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-lime);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:var(--glass);border:1px solid rgba(198,255,0,.4);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+  .topbar{position:relative;z-index:2;text-align:center;margin-bottom:24px}
+  .topbar .k{font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:var(--neon-lime);text-transform:uppercase}
+  .topbar h1{font-family:'Archivo Black',sans-serif;font-size:1.8rem;text-transform:uppercase;margin-top:4px;
+    background:linear-gradient(90deg,var(--neon-lime),var(--neon-cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .phone{position:relative;z-index:2;width:390px;max-width:100%;border-radius:46px;padding:14px;backdrop-filter:blur(22px);
+    background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(198,255,0,.12)}
+  .screen{background:linear-gradient(180deg,#05140e,#04101a);border-radius:34px;overflow:hidden;height:790px;display:flex;flex-direction:column;position:relative}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#000;border-radius:999px;z-index:5}
+  .statusbar{display:flex;justify-content:space-between;padding:14px 24px 6px;font-size:.72rem;color:var(--muted);font-weight:700}
+  .appbar{padding:6px 18px 12px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .logo-dot{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--neon-lime),var(--neon-cyan));display:grid;place-items:center;font-size:1.2rem;position:relative}
+  .logo-dot::after{content:"";position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;background:#00ff6a;border:2px solid #05140e}
+  .appbar .nm{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem}
+  .appbar .nm small{display:block;font-weight:400;font-size:.66rem;color:var(--muted)}
+
+  .chat{flex:1;overflow-y:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:14px}
+  .chat::-webkit-scrollbar{width:0}
+  .day{text-align:center;font-size:.66rem;color:var(--muted);margin:4px 0}
+  .msg{max-width:84%;padding:12px 14px;border-radius:18px;font-size:.9rem;line-height:1.45;animation:pop .35s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}}
+  .me{align-self:flex-end;background:linear-gradient(135deg,#16384a,#1d2a4a);border:1px solid rgba(0,240,255,.3);border-bottom-right-radius:5px}
+  .coach{align-self:flex-start;background:var(--coach);border:1px solid rgba(198,255,0,.22);border-bottom-left-radius:5px;position:relative}
+  .coach .who{font-family:'Bungee',sans-serif;font-size:.56rem;letter-spacing:.14em;color:var(--neon-lime);text-transform:uppercase;margin-bottom:5px}
+  .coach b{color:var(--neon-lime)}
+  .verdict{margin-top:9px;display:inline-block;font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--neon-lime);color:#031a12;padding:6px 12px;border-radius:9px}
+
+  /* lineup card from "set my lineup" */
+  .lineup{align-self:stretch;background:linear-gradient(160deg,rgba(0,240,255,.08),rgba(198,255,0,.06));border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px;animation:pop .4s ease}
+  .lineup .lh{font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-cyan);margin-bottom:10px;display:flex;justify-content:space-between}
+  .lineup .lh .proj{color:var(--neon-lime)}
+  .lrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:.84rem}
+  .lrow:last-of-type{border-bottom:0}
+  .lrow .pos{width:34px;font-family:'Bungee',sans-serif;font-size:.56rem;color:var(--muted)}
+  .lrow .pl{flex:1;font-weight:700}
+  .lrow .pl small{font-weight:400;color:var(--muted);font-size:.7rem}
+  .lrow .pt{color:var(--neon-lime);font-weight:700}
+  .lrow.changed{background:rgba(198,255,0,.08);border-radius:8px;padding:7px 8px;margin:2px -8px}
+  .lrow.changed .chg{font-size:.6rem;color:var(--neon-pink);font-family:'Bungee',sans-serif;letter-spacing:.06em}
+  .confirm{margin-top:12px;width:100%;border:0;border-radius:12px;padding:13px;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;background:var(--neon-lime);color:#031a12;cursor:pointer}
+
+  .suggest{padding:8px 14px 6px;display:flex;gap:8px;overflow-x:auto}
+  .suggest::-webkit-scrollbar{height:0}
+  .chipx{flex-shrink:0;font-size:.74rem;background:rgba(198,255,0,.1);border:1px solid rgba(198,255,0,.35);color:var(--neon-lime);
+    padding:8px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .chipx:hover{background:rgba(198,255,0,.2)}
+  .inputbar{display:flex;align-items:center;gap:10px;padding:12px 16px 24px;border-top:1px solid rgba(255,255,255,.07)}
+  .inputbar .box{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:12px 16px;color:var(--muted);font-size:.86rem}
+  .inputbar .send{width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--neon-lime),var(--neon-cyan));display:grid;place-items:center;font-size:1.1rem;cursor:pointer;color:#031a12}
+  .typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;background:var(--coach);border-radius:18px;border-bottom-left-radius:5px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--neon-lime);animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
+
+  .note{position:relative;z-index:2;color:var(--muted);font-size:.78rem;margin-top:22px;max-width:390px;text-align:center}
+  .note b{color:var(--neon-lime)}
+  .mb{margin-top:16px;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .mb a{color:var(--neon-lime);text-decoration:none}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="topbar">
+  <div class="k">Brief 2 · App</div>
+  <h1>Coach in Your Pocket</h1>
+</div>
+
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="statusbar"><span>10:52</span><span>5G &nbsp; 92%</span></div>
+    <div class="appbar">
+      <div class="logo-dot">🧢</div>
+      <div class="nm">Coach<small>knows your league · online</small></div>
+    </div>
+
+    <div class="chat" id="chat">
+      <div class="day">Sunday · 10:52 AM · 8 min to lock</div>
+
+      <div class="msg me">Hall or Pollard this week?</div>
+      <div class="msg coach">
+        <div class="who">Coach</div>
+        Start <b>Breece Hall</b>. Pollard's on a run-funnel defense but he's splitting goal-line work now; Hall's seeing 78% snaps and a top-8 matchup on the ground. You value floor — Hall's is higher.
+        <span class="verdict">▶ Start Hall</span>
+      </div>
+
+      <div class="msg me">anything I should know about my team today?</div>
+      <div class="msg coach">
+        <div class="who">Coach · proactive scan</div>
+        Three things. <b>Rashee Rice is OUT</b> (knee, overnight) — he's still in your flex. <b>Njoku</b> cleared, you're fine there. And <b>Spears</b> is trending up on waivers if you want him next week. Want me to fix the flex?
+      </div>
+
+      <div class="msg me">yeah, just set my lineup</div>
+
+      <div class="lineup">
+        <div class="lh"><span>Optimized Lineup · Week 11</span><span class="proj">proj 131.4</span></div>
+        <div class="lrow"><span class="pos">QB</span><span class="pl">Jalen Hurts <small>PHI vs WAS</small></span><span class="pt">22.1</span></div>
+        <div class="lrow"><span class="pos">RB</span><span class="pl">Breece Hall <small>NYJ vs IND</small></span><span class="pt">17.4</span></div>
+        <div class="lrow"><span class="pos">RB</span><span class="pl">Kyren Williams <small>LAR vs NO</small></span><span class="pt">16.0</span></div>
+        <div class="lrow"><span class="pos">WR</span><span class="pl">A.J. Brown <small>PHI vs WAS</small></span><span class="pt">15.8</span></div>
+        <div class="lrow"><span class="pos">WR</span><span class="pl">Nico Collins <small>HOU vs TEN</small></span><span class="pt">15.1</span></div>
+        <div class="lrow changed"><span class="pos">FLEX</span><span class="pl">Jauan Jennings <small>SF vs ARI</small> <span class="chg">▲ swapped in for Rice</span></span><span class="pt">14.2</span></div>
+        <div class="lrow"><span class="pos">TE</span><span class="pl">David Njoku <small>CLE vs PIT</small></span><span class="pt">10.8</span></div>
+        <div class="lrow"><span class="pos">K</span><span class="pl">Jake Bates <small>DET vs GB</small></span><span class="pt">8.5</span></div>
+        <div class="lrow"><span class="pos">DEF</span><span class="pl">Texans D/ST</span><span class="pt">9.5</span></div>
+        <button class="confirm" onclick="this.textContent='✓ Lineup locked in';this.style.background='#00ff6a'">✓ Confirm this lineup</button>
+      </div>
+    </div>
+
+    <div class="suggest">
+      <div class="chipx" onclick="ask(this)">Is Bijan a sell-high?</div>
+      <div class="chipx" onclick="ask(this)">Who do I drop for Spears?</div>
+      <div class="chipx" onclick="ask(this)">Why is everyone dropping Zay?</div>
+    </div>
+    <div class="inputbar">
+      <div class="box" id="box">Text Coach anything…</div>
+      <button class="send" onclick="fire()">➤</button>
+    </div>
+  </div>
+</div>
+
+<p class="note">Two features in focus: <b>conversational, league-aware Q&A</b> with one-sentence reasoning, and the <b>"set my lineup"</b> one-shot that proposes a final lineup you confirm with a tap.</p>
+<div class="mb"><a href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a></div>
+
+<script>
+const chat=document.getElementById('chat');
+const answers={
+  "Is Bijan a sell-high?":"Hold him. His snap share just hit a season high and the schedule softens after Week 12. Selling now is selling the dip — you value floor, and his is climbing.",
+  "Who do I drop for Spears?":"Drop <b>Roschon Johnson</b>. He's behind two backs and hasn't cracked 8 touches in a month. Spears is the better dart at your RB2 hole.",
+  "Why is everyone dropping Zay?":"Zay Flowers' target share cratered to 14% over three weeks as the offense leaned run-heavy. People are chasing usage, not talent. In <b>your</b> league he's still rostered, so don't overthink it."
+};
+function bubble(cls,html){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;return d;}
+function typing(){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';chat.appendChild(t);chat.scrollTop=chat.scrollHeight;return t;}
+function respond(q){
+  bubble('me',q);
+  const t=typing();
+  setTimeout(()=>{t.remove();const a=answers[q]||"Good question — give me a sec to pull your roster and the latest news, then I'll give you a one-liner you can act on.";bubble('coach','<div class="who">Coach</div>'+a);},900);
+}
+function ask(el){respond(el.textContent);}
+function fire(){const v=document.getElementById('box').textContent;if(v&&v!=='Text Coach anything…')respond(v);}
+</script>
+</body>
+</html>

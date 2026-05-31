@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The League Press — App</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&family=Bungee+Shade&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1a0010;--neon-pink:#ff2d95;--neon-orange:#ff8a00;--neon-yellow:#ffd000;--neon-cyan:#00f0ff;
+    --text:#fff0f8;--muted:#d09cbd;--glass:rgba(255,255,255,0.06);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;padding:36px 16px;position:relative;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 80% 0%,rgba(255,138,0,.2),transparent 45%),
+    radial-gradient(circle at 10% 100%,rgba(255,45,149,.22),transparent 45%),linear-gradient(180deg,#1a0010,#0a0118)}
+  .back{position:fixed;top:18px;left:18px;z-index:9;color:var(--neon-pink);text-decoration:none;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.1em;
+    background:var(--glass);border:1px solid rgba(255,45,149,.5);border-radius:999px;padding:8px 16px;backdrop-filter:blur(10px)}
+  .topbar{position:relative;z-index:2;text-align:center;margin-bottom:24px}
+  .topbar .k{font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.28em;color:var(--neon-orange);text-transform:uppercase}
+  .topbar h1{font-family:'Archivo Black',sans-serif;font-size:1.8rem;text-transform:uppercase;margin-top:4px;
+    background:linear-gradient(90deg,var(--neon-pink),var(--neon-orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .phone{position:relative;z-index:2;width:390px;max-width:100%;border-radius:46px;padding:14px;backdrop-filter:blur(22px);
+    background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,45,149,.14)}
+  .screen{background:linear-gradient(180deg,#1a0010,#0a0118);border-radius:34px;overflow:hidden;height:790px;display:flex;flex-direction:column;position:relative}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#000;border-radius:999px;z-index:5}
+  .statusbar{display:flex;justify-content:space-between;padding:14px 24px 6px;font-size:.72rem;color:var(--muted);font-weight:700}
+  .appbar{padding:6px 18px 10px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .appbar .nm{font-family:'Bungee Shade',cursive;font-size:1.5rem;letter-spacing:.02em;line-height:1;color:var(--neon-yellow)}
+  .appbar .sub{font-size:.66rem;color:var(--muted);margin-top:3px}
+
+  .tabs{display:flex;gap:6px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.07);overflow-x:auto}
+  .tabs::-webkit-scrollbar{height:0}
+  .tab{flex-shrink:0;font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;
+    padding:8px 12px;border-radius:999px;color:var(--muted);background:rgba(255,255,255,.05);cursor:pointer;border:1px solid transparent}
+  .tab.on{color:#1a0010;background:linear-gradient(90deg,var(--neon-pink),var(--neon-orange));border-color:transparent}
+
+  .scroll{flex:1;overflow-y:auto;padding:16px 16px 30px}
+  .scroll::-webkit-scrollbar{width:0}
+  .view{display:none}.view.on{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+
+  .secttl{font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--neon-orange);margin:4px 0 14px}
+
+  /* power rankings */
+  .rank{display:flex;gap:12px;align-items:flex-start;background:var(--glass);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden}
+  .rank .pos{font-family:'Archivo Black',sans-serif;font-size:2rem;line-height:.9;width:42px;text-align:center;
+    background:linear-gradient(180deg,var(--neon-yellow),var(--neon-orange));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .rank .body{flex:1}
+  .rank .nm{font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px}
+  .rank .mv{font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:6px}
+  .mv.up{background:rgba(0,255,106,.18);color:#00ff6a}.mv.dn{background:rgba(255,77,109,.18);color:#ff4d6d}.mv.eq{background:rgba(255,255,255,.1);color:var(--muted)}
+  .rank .rec{font-size:.7rem;color:var(--muted)}
+  .rank .roast{font-size:.82rem;color:#ffd9ee;line-height:1.45;margin-top:7px;font-style:italic}
+  .rank.you{border-color:var(--neon-cyan);box-shadow:0 0 18px rgba(0,240,255,.18)}
+  .rank.you .pos{background:linear-gradient(180deg,var(--neon-cyan),var(--neon-pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* awards */
+  .award{border-radius:18px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.14)}
+  .award .grid-bg{position:absolute;inset:0;opacity:.25;background-image:linear-gradient(rgba(255,45,149,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,208,0,.5) 1px,transparent 1px);background-size:24px 24px}
+  .award.a1{background:linear-gradient(135deg,#2a0033,#4a0028)}
+  .award.a2{background:linear-gradient(135deg,#33200a,#4a1500)}
+  .award.a3{background:linear-gradient(135deg,#001a2a,#002a33)}
+  .award .em{font-size:2rem;position:relative}
+  .award .tt{font-family:'Bungee',sans-serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--neon-yellow);margin:8px 0 4px;position:relative}
+  .award .win{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.25rem;position:relative}
+  .award .desc{font-size:.82rem;color:#f0d6e8;margin-top:6px;line-height:1.45;position:relative}
+  .award .share{margin-top:12px;position:relative;display:inline-flex;align-items:center;gap:7px;font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 13px;cursor:pointer}
+  .award .share:hover{background:rgba(255,255,255,.22)}
+
+  /* share card preview */
+  .scard{margin-top:16px;border-radius:16px;overflow:hidden;border:2px solid var(--neon-pink);position:relative;background:linear-gradient(135deg,#2a0033,#4a0028)}
+  .scard .gb{position:absolute;inset:0;opacity:.3;background-image:linear-gradient(rgba(0,240,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,45,149,.5) 1px,transparent 1px);background-size:22px 22px}
+  .scard .in{position:relative;padding:18px}
+  .scard .h{font-family:'Bungee',sans-serif;font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--neon-yellow)}
+  .scard .big{font-family:'Bungee Shade',cursive;font-size:1.5rem;line-height:1;color:#fff;margin:10px 0}
+  .scard .sub{font-size:.82rem;color:#ffd9ee}
+  .scard .ft{margin-top:12px;display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .sbtns{display:flex;gap:8px;margin-top:12px}
+  .sbtns button{flex:1;border:0;border-radius:11px;padding:11px;font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  .b1{background:var(--neon-pink);color:#fff}.b2{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+
+  .note{position:relative;z-index:2;color:var(--muted);font-size:.78rem;margin-top:22px;max-width:390px;text-align:center}
+  .note b{color:var(--neon-pink)}
+  .mb{margin-top:16px;font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .mb a{color:var(--neon-orange);text-decoration:none}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Reel</a>
+<div class="topbar">
+  <div class="k">Brief 3 · App</div>
+  <h1>The League Press</h1>
+</div>
+
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="statusbar"><span>Tue 9:00</span><span>5G &nbsp; 88%</span></div>
+    <div class="appbar">
+      <div class="nm">THE LEAGUE PRESS</div>
+      <div class="sub">Couch Potatoes · Week 11 · Voice: 🔥 Hot Takes</div>
+    </div>
+    <div class="tabs">
+      <div class="tab on" onclick="show('rank',this)">Power Rankings</div>
+      <div class="tab" onclick="show('award',this)">Weekly Awards</div>
+      <div class="tab" onclick="show('share',this)">Share Cards</div>
+    </div>
+
+    <div class="scroll">
+      <div class="view on" id="rank">
+        <div class="secttl">Power Rankings · Week 11</div>
+        <div class="rank">
+          <div class="pos">1</div>
+          <div class="body">
+            <div class="nm">Dynasty Warriors <span class="mv eq">— 1</span></div>
+            <div class="rec">9–2 · 1,412 PF</div>
+            <div class="roast">"Still undefeated against everyone except the part of the schedule that mattered. Enjoy the regular season, champ — January's where you choke."</div>
+          </div>
+        </div>
+        <div class="rank">
+          <div class="pos">2</div>
+          <div class="body">
+            <div class="nm">Bijan Mustard <span class="mv up">▲ 3</span></div>
+            <div class="rec">7–4 · 1,355 PF</div>
+            <div class="roast">"Three-week heater and suddenly he's texting the chat like he invented the waiver wire. We see you, recency boy."</div>
+          </div>
+        </div>
+        <div class="rank you">
+          <div class="pos">4</div>
+          <div class="body">
+            <div class="nm">Kevin's Couch <span class="mv up">▲ 2</span></div>
+            <div class="rec">6–4 · 1,288 PF · YOU</div>
+            <div class="roast">"Quietly stacking wins by reading the inactives report. Boring? Yes. In the hunt for a bye? Also yes. The diner respects it."</div>
+          </div>
+        </div>
+        <div class="rank">
+          <div class="pos">10</div>
+          <div class="body">
+            <div class="nm">Punt Returns Only <span class="mv dn">▼ 4</span></div>
+            <div class="rec">2–9 · 989 PF</div>
+            <div class="roast">"Started a kicker on a bye. Twice. We're not even mad anymore, we're just taking notes for the eulogy."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="award">
+        <div class="secttl">Weekly Awards · Week 11</div>
+        <div class="award a1">
+          <div class="grid-bg"></div>
+          <div class="em">🐂</div>
+          <div class="tt">The Bell Cow</div>
+          <div class="win">Bijan Mustard</div>
+          <div class="desc">Rode Breece Hall for 31.4 and didn't shut up about it in the chat for 48 straight hours. Earned, annoying, both.</div>
+          <span class="share" onclick="show('share',document.querySelectorAll('.tab')[2])">📤 Make share card</span>
+        </div>
+        <div class="award a2">
+          <div class="grid-bg"></div>
+          <div class="em">💀</div>
+          <div class="tt">Disaster of the Week</div>
+          <div class="win">Punt Returns Only</div>
+          <div class="desc">Left 41 points on the bench, then lost by 3. Started a defense on bye. The kind of week that becomes league lore.</div>
+          <span class="share" onclick="show('share',document.querySelectorAll('.tab')[2])">📤 Make share card</span>
+        </div>
+        <div class="award a3">
+          <div class="grid-bg"></div>
+          <div class="em">🛋️</div>
+          <div class="tt">Couch Vibes (lucky win)</div>
+          <div class="win">Kevin's Couch</div>
+          <div class="desc">Won despite the 6th-best score of the week. Schedule luck is a skill if you squint. Don't tell the others.</div>
+          <span class="share" onclick="show('share',document.querySelectorAll('.tab')[2])">📤 Make share card</span>
+        </div>
+      </div>
+
+      <div class="view" id="share">
+        <div class="secttl">Share Card · ready for the group chat</div>
+        <div class="scard">
+          <div class="gb"></div>
+          <div class="in">
+            <div class="h">Couch Potatoes · Disaster of the Week</div>
+            <div class="big">41 ON THE<br>BENCH</div>
+            <div class="sub">Punt Returns Only left 41 points sitting and lost by 3. A new league record in self-sabotage.</div>
+            <div class="ft"><span>The League Press</span><span>◆ Wk 11</span></div>
+          </div>
+        </div>
+        <div class="sbtns">
+          <button class="b1">Send to chat</button>
+          <button class="b2">Save image</button>
+        </div>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:14px;text-align:center">Every award + recap auto-generates a card sized for iMessage, Discord & WhatsApp.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">Two features in focus: <b>power rankings that roast</b> each manager in your chosen voice, and <b>weekly awards</b> that auto-build <b>shareable cards</b> for the group chat.</p>
+<div class="mb"><a href="https://meatbagmade.com" target="_blank" rel="noopener">◆ Meatbag Made</a></div>
+
+<script>
+function show(id,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.querySelector('.scroll').scrollTop=0;
+}
+</script>
+</body>
+</html>
