@@ -158,6 +158,28 @@
   .vote-count .lbl{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.78rem;color:var(--muted);margin-left:5px}
   .vote-flash{color:var(--neon-lime)!important;transition:color .4s}
 
+  /* floating soundtrack toggle */
+  .soundtrack{
+    position:fixed;right:18px;bottom:18px;z-index:50;
+    display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+    font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--neon-cyan);background:rgba(10,1,24,.72);border:1.5px solid var(--neon-cyan);
+    border-radius:999px;padding:11px 18px;backdrop-filter:blur(10px);
+    box-shadow:0 0 18px rgba(0,240,255,.25);
+    transition:transform .15s,box-shadow .2s,color .2s,border-color .2s;
+  }
+  .soundtrack:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,240,255,.5)}
+  .soundtrack .eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+  .soundtrack .eq i{width:3px;background:var(--neon-cyan);border-radius:2px;height:4px}
+  /* animate the bars only while playing */
+  .soundtrack.playing{color:var(--neon-lime);border-color:var(--neon-lime);box-shadow:0 0 22px rgba(198,255,0,.4)}
+  .soundtrack.playing .eq i{background:var(--neon-lime);animation:eq .9s ease-in-out infinite}
+  .soundtrack.playing .eq i:nth-child(2){animation-delay:.18s}
+  .soundtrack.playing .eq i:nth-child(3){animation-delay:.36s}
+  .soundtrack.playing .eq i:nth-child(4){animation-delay:.54s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+  @media(max-width:600px){.soundtrack{font-size:.58rem;padding:9px 14px;right:12px;bottom:12px}}
+
   footer{
     margin-top:64px;text-align:center;padding-top:30px;border-top:1px solid var(--glass-border);
   }
@@ -283,6 +305,51 @@
     </a>
   </footer>
 </div>
+
+<!-- soundtrack: home page only. Filename has spaces -> URL-encoded src. -->
+<audio id="track" loop preload="auto" src="just%20like%20summer%20cover.mp3"></audio>
+<button class="soundtrack" id="soundtrack" type="button" aria-label="Toggle soundtrack" aria-pressed="false">
+  <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <span id="soundtrackLabel">Soundtrack</span>
+</button>
+
+<script>
+(function(){
+  // ---- Soundtrack toggle ----
+  // Browsers block autoplay-with-sound until a user gesture, so we can't truly
+  // play "on load". We try to start on the very first interaction anywhere on the
+  // page (the closest legal thing to autoplay); the button also toggles manually.
+  const audio = document.getElementById("track");
+  const btn   = document.getElementById("soundtrack");
+  const label = document.getElementById("soundtrackLabel");
+  let userPaused = false;  // becomes true only if the user explicitly pauses
+
+  function reflect(){
+    const playing = !audio.paused;
+    btn.classList.toggle("playing", playing);
+    btn.setAttribute("aria-pressed", playing ? "true" : "false");
+    label.textContent = playing ? "Playing" : "Soundtrack";
+  }
+  audio.addEventListener("play", reflect);
+  audio.addEventListener("pause", reflect);
+
+  function play(){ audio.play().then(reflect).catch(()=>{}); }
+
+  btn.addEventListener("click", () => {
+    if(audio.paused){ userPaused = false; play(); }
+    else { userPaused = true; audio.pause(); }
+  });
+
+  // attempt autoplay on the first user gesture (once), unless they've paused it
+  function kick(){
+    if(!userPaused && audio.paused) play();
+    window.removeEventListener("pointerdown", kick);
+    window.removeEventListener("keydown", kick);
+  }
+  window.addEventListener("pointerdown", kick);
+  window.addEventListener("keydown", kick);
+})();
+</script>
 
 <script>
 (function(){
