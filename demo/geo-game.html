@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Where in the World is Chargers, San Diego?</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -627,7 +627,10 @@ function visible(lnglat){
 
 /* ---- interaction: drag to rotate, click to drop pin ---- */
 let dragged=false;
+// Mouse-only drag (D3). Touch is handled by the unified touch handler below so
+// that one finger = rotate and two fingers = pinch-zoom without the two fighting.
 const drag=d3.drag()
+  .filter(ev=>ev.pointerType!=="touch" && !ev.button)
   .on("start",()=>{dragged=false;})
   .on("drag",(ev)=>{
     dragged=true;
@@ -655,36 +658,78 @@ function setScale(s){scale=Math.max(150,Math.min(900,s));redraw();}
 function zoomBy(f){setScale(scale*f);}
 function spinHome(){projection.rotate([95,-38]);scale=205;redraw();}
 
-/* ---- pinch-to-zoom (two-finger) + mouse-wheel zoom ---- */
+/* ---- touch interaction: 1 finger = rotate · 2 fingers = pinch-zoom · tap = pin ----
+   Self-contained so the gesture stays inside the globe and never zooms the page.
+   (D3 drag above is filtered to mouse only, so the two don't fight on touch.) */
 (function(){
   const el=document.getElementById("globe");
   if(!el) return;
+
   // wheel zoom (desktop) — scroll up = zoom in
   el.addEventListener("wheel",(ev)=>{
     ev.preventDefault();
     zoomBy(ev.deltaY<0?1.12:0.89);
   },{passive:false});
 
-  // pinch zoom (touch). Two-finger gesture adjusts scale by the change in finger spread.
-  let pinchStartDist=0, pinchStartScale=0;
+  // map a touch's client coords into the SVG's 0..W / 0..H viewBox space
+  function svgXY(t){
+    const r=el.getBoundingClientRect();
+    return [ (t.clientX-r.left)/r.width*W, (t.clientY-r.top)/r.height*H ];
+  }
   const dist=(t)=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+
+  let mode=0;            // 0=idle, 1=rotate, 2=pinch
+  let lastX=0,lastY=0;   // last single-finger position (SVG space)
+  let pinchStartDist=0, pinchStartScale=0;
+  let startX=0,startY=0, moved=0;  // for tap detection
+
   el.addEventListener("touchstart",(ev)=>{
+    ev.preventDefault();              // keep the gesture off the page
     if(ev.touches.length===2){
-      dragged=true; // suppress click-to-pin while pinching
-      pinchStartDist=dist(ev.touches);
+      mode=2; dragged=true;
+      pinchStartDist=dist(ev.touches)||1;
       pinchStartScale=scale;
-      ev.preventDefault();
+    }else if(ev.touches.length===1){
+      mode=1; dragged=false; moved=0;
+      const p=svgXY(ev.touches[0]);
+      lastX=startX=p[0]; lastY=startY=p[1];
     }
   },{passive:false});
+
   el.addEventListener("touchmove",(ev)=>{
-    if(ev.touches.length===2 && pinchStartDist>0){
+    ev.preventDefault();
+    if(mode===2 && ev.touches.length>=2){
       const d=dist(ev.touches);
       setScale(pinchStartScale*(d/pinchStartDist));
-      ev.preventDefault();
+    }else if(mode===1 && ev.touches.length===1){
+      const p=svgXY(ev.touches[0]);
+      const dx=p[0]-lastX, dy=p[1]-lastY;
+      lastX=p[0]; lastY=p[1];
+      moved+=Math.abs(dx)+Math.abs(dy);
+      if(moved>4) dragged=true;       // treat as a spin, not a tap
+      const r=projection.rotate();
+      const k=70/scale;
+      projection.rotate([r[0]+dx*k, r[1]-dy*k, r[2]]);
+      redraw();
     }
   },{passive:false});
+
   el.addEventListener("touchend",(ev)=>{
-    if(ev.touches.length<2){ pinchStartDist=0; }
+    // Single quick tap (no real movement) drops a pin.
+    if(mode===1 && moved<=4 && !locked && !answered){
+      const ll=projection.invert([startX,startY]);
+      const r=projection.rotate();
+      if(ll && !isNaN(ll[0]) && d3.geoDistance([ll[0],ll[1]],[-r[0],-r[1]])<=Math.PI/2){
+        guess=[ll[0],ll[1]];
+        drawMarks();
+        document.getElementById("lockBtn").disabled=false;
+        document.getElementById("hint").textContent="Pin dropped. Reposition, or 🔒 Lock it in.";
+      }
+    }
+    if(ev.touches.length===0){ mode=0; pinchStartDist=0; }
+    else if(ev.touches.length===1){ // lifted one finger of a pinch -> resume rotate
+      mode=1; const p=svgXY(ev.touches[0]); lastX=p[0]; lastY=p[1]; moved=99;
+    }
   });
 })();
 
