@@ -153,6 +153,7 @@
   <div class="console" id="console">
     <div class="globewrap">
       <div class="scr"><span>◉ ACME TRACKING GLOBE</span><span id="tgt">SPIN · ZOOM · DROP PIN</span></div>
+      <div class="scr" style="margin-top:-4px;margin-bottom:6px"><span id="dbg" style="color:#ffb627">touch: —</span></div>
       <svg id="globe" viewBox="0 0 440 440" width="440" height="440" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
       <div class="ctrls">
         <button onclick="zoomBy(1.4)">＋ Zoom</button>
@@ -664,6 +665,14 @@ function spinHome(){projection.rotate([95,-38]);scale=205;redraw();}
 (function(){
   const el=document.getElementById("globe");
   if(!el) return;
+  const dbg=document.getElementById("dbg");
+  const say=(m)=>{ if(dbg) dbg.textContent="touch: "+m; };
+
+  // iOS Safari fires its own pinch "gesture*" events at the document and can
+  // swallow the second touch — block them so our touch handler owns the pinch.
+  ["gesturestart","gesturechange","gestureend"].forEach(t=>{
+    document.addEventListener(t,e=>e.preventDefault(),{passive:false});
+  });
 
   // wheel zoom (desktop) — scroll up = zoom in
   el.addEventListener("wheel",(ev)=>{
@@ -685,6 +694,7 @@ function spinHome(){projection.rotate([95,-38]);scale=205;redraw();}
 
   el.addEventListener("touchstart",(ev)=>{
     ev.preventDefault();              // keep the gesture off the page
+    say(ev.touches.length+" down");
     if(ev.touches.length===2){
       mode=2; dragged=true;
       pinchStartDist=dist(ev.touches)||1;
@@ -701,6 +711,7 @@ function spinHome(){projection.rotate([95,-38]);scale=205;redraw();}
     if(mode===2 && ev.touches.length>=2){
       const d=dist(ev.touches);
       setScale(pinchStartScale*(d/pinchStartDist));
+      say("pinch z="+Math.round(scale));
     }else if(mode===1 && ev.touches.length===1){
       const p=svgXY(ev.touches[0]);
       const dx=p[0]-lastX, dy=p[1]-lastY;
