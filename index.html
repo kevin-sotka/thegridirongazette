@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Gridiron Gazette — Product Demo Reel</title>
+<title>The Gridiron Gazette — Today's Trail Report</title>
+<meta name="description" content="The Gridiron Gazette: the day's top NFL news, told straight by Doc. Get the draft-day value, find the diamond in the rough, win the championship — and make your leaguemates feel it.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Bungee&family=Outfit:wght@300;400;600;800&family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0118;
@@ -15,12 +16,18 @@
     --neon-lime:#c6ff00;
     --neon-purple:#a259ff;
     --neon-orange:#ff8a00;
+    /* frontier accents */
+    --amber:#ffb627;
+    --rust:#c0533a;
+    --parch:#e8dcc0;
+    --leather:#3a2616;
     --glass:rgba(255,255,255,0.06);
     --glass-border:rgba(255,255,255,0.16);
     --text:#f4f0ff;
     --muted:#b9aee0;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
   body{
     font-family:'Space Grotesk',system-ui,sans-serif;
     background:var(--bg);
@@ -29,396 +36,238 @@
     overflow-x:hidden;
     position:relative;
   }
-  /* animated neon grid backdrop */
+  /* animated neon grid backdrop (the synthwave base) */
   body::before{
     content:"";position:fixed;inset:0;z-index:0;
     background:
-      radial-gradient(circle at 15% 10%, rgba(255,45,149,0.22), transparent 42%),
-      radial-gradient(circle at 85% 20%, rgba(0,240,255,0.18), transparent 45%),
-      radial-gradient(circle at 50% 90%, rgba(162,89,255,0.22), transparent 50%),
+      radial-gradient(circle at 15% 10%, rgba(255,138,0,0.22), transparent 42%),
+      radial-gradient(circle at 85% 18%, rgba(0,240,255,0.16), transparent 45%),
+      radial-gradient(circle at 50% 92%, rgba(162,89,255,0.22), transparent 50%),
       linear-gradient(180deg,var(--bg),var(--bg2));
   }
   body::after{
-    content:"";position:fixed;inset:0;z-index:0;opacity:0.25;
+    content:"";position:fixed;inset:0;z-index:0;opacity:0.22;
     background-image:
-      linear-gradient(rgba(0,240,255,0.25) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(255,45,149,0.25) 1px,transparent 1px);
+      linear-gradient(rgba(255,182,39,0.28) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,240,255,0.22) 1px,transparent 1px);
     background-size:48px 48px;
     transform:perspective(420px) rotateX(58deg);
     transform-origin:center 120%;
     mask-image:linear-gradient(180deg,transparent,#000 60%);
-    animation:grid 14s linear infinite;
+    animation:grid 16s linear infinite;
   }
   @keyframes grid{from{background-position:0 0}to{background-position:0 48px}}
-  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:48px 24px 80px}
-  header{text-align:center;margin-bottom:44px}
+
+  .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:34px 22px 90px}
+
+  /* ===== TOP BAR ===== */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:30px;flex-wrap:wrap}
+  .brandmark{display:flex;align-items:center;gap:14px}
+  .brandmark img{height:54px;width:auto;filter:drop-shadow(0 0 14px rgba(255,138,0,.5))}
+  .brandmark .bn{font-family:'Rye',serif;font-size:1.15rem;letter-spacing:.02em;color:var(--amber);line-height:1.05}
+  .brandmark .bn small{display:block;font-family:'Special Elite',monospace;font-size:.62rem;letter-spacing:.25em;color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .nav{display:flex;gap:10px;flex-wrap:wrap}
+  .nav a{
+    font-family:'Special Elite',monospace;font-size:.8rem;letter-spacing:.05em;
+    color:var(--text);text-decoration:none;border:1.5px solid var(--glass-border);
+    background:var(--glass);backdrop-filter:blur(8px);
+    padding:9px 15px;border-radius:8px;transition:.18s;white-space:nowrap;
+  }
+  .nav a:hover{border-color:var(--amber);color:var(--amber);box-shadow:0 0 16px rgba(255,182,39,.35);transform:translateY(-2px)}
+  .nav a.game{border-color:var(--neon-cyan);color:var(--neon-cyan)}
+  .nav a.game:hover{box-shadow:0 0 16px rgba(0,240,255,.45)}
+
+  /* ===== HERO ===== */
+  header.hero{text-align:center;margin-bottom:18px}
   .kicker{
-    display:inline-block;font-family:'Bungee',sans-serif;font-size:.72rem;letter-spacing:.32em;
-    color:var(--neon-cyan);border:1.5px solid var(--neon-cyan);border-radius:999px;
-    padding:7px 18px;text-transform:uppercase;margin-bottom:22px;
-    box-shadow:0 0 18px rgba(0,240,255,.4);backdrop-filter:blur(8px);
+    display:inline-block;font-family:'Special Elite',monospace;font-size:.7rem;letter-spacing:.28em;
+    color:var(--amber);border:1.5px solid var(--amber);border-radius:999px;
+    padding:7px 18px;text-transform:uppercase;margin-bottom:20px;
+    box-shadow:0 0 18px rgba(255,182,39,.3);backdrop-filter:blur(8px);
   }
-  h1{
-    font-family:'Archivo Black',sans-serif;font-size:clamp(2.6rem,7vw,5.4rem);line-height:.92;
-    letter-spacing:-.02em;text-transform:uppercase;
-    background:linear-gradient(92deg,var(--neon-pink),var(--neon-orange) 40%,var(--neon-lime) 75%,var(--neon-cyan));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 4px 30px rgba(255,45,149,.35));
+  header.hero h1{
+    font-family:'Rye',serif;
+    font-size:clamp(2.6rem,7vw,4.6rem);line-height:.98;letter-spacing:.01em;
+    color:var(--parch);
+    text-shadow:0 2px 0 var(--rust),0 0 26px rgba(255,138,0,.45),0 0 50px rgba(162,89,255,.3);
   }
-  .sub{margin-top:16px;font-size:1.05rem;color:var(--muted);max-width:680px;margin-inline:auto}
-  .sub b{color:var(--neon-lime)}
+  header.hero h1 .glow{color:var(--amber)}
+  .doc-howdy{
+    max-width:660px;margin:18px auto 0;font-size:1.06rem;line-height:1.6;color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .doc-howdy b{color:var(--amber)}
+  .doc-sign{margin-top:10px;font-family:'Special Elite',monospace;font-size:.82rem;color:var(--muted);letter-spacing:.04em}
 
-  .section-label{
-    font-family:'Bungee',sans-serif;font-size:.9rem;letter-spacing:.2em;color:var(--neon-pink);
-    margin:48px 0 18px;text-transform:uppercase;display:flex;align-items:center;gap:14px;
-  }
-  .section-label::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--neon-pink),transparent)}
+  /* ===== NEWS BOARD ===== */
+  .board-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:42px 0 18px;flex-wrap:wrap}
+  .board-title{font-family:'Rye',serif;font-size:1.7rem;color:var(--amber);text-shadow:0 0 18px rgba(255,138,0,.4)}
+  .board-sub{font-family:'Special Elite',monospace;font-size:.74rem;color:var(--muted);letter-spacing:.06em}
+  #updated{color:var(--neon-cyan)}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
-  /* the wrapper is now the grid cell; it holds the clickable card + a separate vote bar */
-  .card-wrap{display:flex;flex-direction:column}
-  .card{
-    position:relative;display:block;text-decoration:none;color:inherit;
-    background:var(--glass);border:1px solid var(--glass-border);border-radius:22px 22px 0 0;
-    padding:26px;overflow:hidden;backdrop-filter:blur(18px);flex:1;
-    border-bottom:none;
-    transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s;
+  .news-grid{display:grid;gap:18px}
+  .story{
+    position:relative;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;
+    background:var(--glass);border:1.5px solid var(--glass-border);border-radius:16px;
+    padding:24px 26px;backdrop-filter:blur(10px);overflow:hidden;transition:.2s;
   }
-  .card::before{
-    content:"";position:absolute;inset:0;border-radius:22px 22px 0 0;padding:1px;
-    background:linear-gradient(135deg,var(--c1),transparent 50%,var(--c2));
-    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;mask-composite:exclude;opacity:.7;
+  .story::before{
+    content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;
+    background:linear-gradient(120deg,transparent,rgba(255,138,0,.06));opacity:0;transition:.2s;
   }
-  /* hover lifts the whole tile (card + vote bar) together */
-  .card-wrap:hover{transform:translateY(-8px) scale(1.015)}
-  .card-wrap:hover .card{border-color:transparent;
-    box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 36px var(--c1)}
-  .card-wrap{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
-  .badge{
-    font-family:'Bungee',sans-serif;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
-    padding:5px 11px;border-radius:999px;display:inline-block;margin-bottom:14px;
-    background:var(--c1);color:#0a0118;font-weight:700;
+  .story:hover{transform:translateY(-3px);border-color:var(--amber);box-shadow:0 18px 44px rgba(0,0,0,.45),0 0 26px rgba(255,138,0,.25)}
+  .story:hover::before{opacity:1}
+  .rank{
+    font-family:'Rye',serif;font-size:2.3rem;line-height:1;color:var(--rust);
+    text-shadow:0 0 16px rgba(192,83,58,.6);min-width:48px;text-align:center;padding-top:4px;
   }
-  .badge.alt{background:transparent;border:1.5px solid var(--c2);color:var(--c2)}
-  .card h3{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.5rem;line-height:1.05;margin-bottom:8px}
-  .card p{color:var(--muted);font-size:.92rem;line-height:1.5}
-  .card .go{margin-top:18px;font-family:'Bungee',sans-serif;font-size:.7rem;letter-spacing:.14em;color:var(--c2);
-    display:flex;align-items:center;gap:8px;text-transform:uppercase}
-  .card .go::after{content:"→";font-size:1.1rem;transition:transform .2s}
-  .card-wrap:hover .go::after{transform:translateX(6px)}
+  .story h3{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.32rem;color:var(--parch);margin-bottom:8px;line-height:1.18}
+  .story p{font-size:1rem;line-height:1.58;color:var(--text)}
+  .src{
+    display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+    font-family:'Special Elite',monospace;font-size:.78rem;letter-spacing:.04em;
+    color:var(--neon-cyan);text-decoration:none;border-bottom:1px dashed rgba(0,240,255,.5);padding-bottom:1px;transition:.15s;
+  }
+  .src:hover{color:var(--amber);border-color:var(--amber)}
+  .src .arrow{font-size:.85rem}
+  .loading,.errbox{text-align:center;padding:40px 20px;color:var(--muted);font-family:'Special Elite',monospace}
 
-  /* color themes per card */
-  .t-brief1{--c1:var(--neon-cyan);--c2:var(--neon-pink)}
-  .t-brief2{--c1:var(--neon-lime);--c2:var(--neon-cyan)}
-  .t-brief3{--c1:var(--neon-pink);--c2:var(--neon-orange)}
-  .t-game{--c1:var(--neon-orange);--c2:var(--neon-purple)}
-
-  .game-wrap{grid-column:1/-1}
-  .game-card{display:flex;gap:28px;align-items:center;flex-wrap:wrap;padding:34px}
-  .game-card .globe{font-size:4.5rem;filter:drop-shadow(0 0 24px var(--neon-cyan));animation:spin 8s linear infinite}
+  /* ===== TWO ROADS (briefs + game) ===== */
+  .roads{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:46px}
+  .road{
+    position:relative;display:block;text-decoration:none;color:var(--text);
+    background:var(--glass);border:1.5px solid var(--glass-border);border-radius:18px;
+    padding:30px 28px;backdrop-filter:blur(10px);overflow:hidden;transition:.2s;
+  }
+  .road .big{font-size:2.4rem;display:block;margin-bottom:12px;filter:drop-shadow(0 0 16px var(--c2))}
+  .road h4{font-family:'Rye',serif;font-size:1.5rem;color:var(--parch);margin-bottom:8px}
+  .road p{font-size:.96rem;line-height:1.5;color:var(--muted)}
+  .road .go{display:inline-block;margin-top:16px;font-family:'Special Elite',monospace;font-size:.82rem;letter-spacing:.05em;color:var(--c2)}
+  .road:hover{transform:translateY(-4px);border-color:var(--c2);box-shadow:0 20px 50px rgba(0,0,0,.45),0 0 28px var(--c2)}
+  .road.briefs{--c1:var(--neon-pink);--c2:var(--neon-pink)}
+  .road.game{--c1:var(--neon-cyan);--c2:var(--neon-cyan)}
+  .road.game .big{animation:spin 9s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .game-card .gtxt{flex:1;min-width:260px}
-  .game-card h3{font-size:2rem}
 
-  /* vote CTA in header */
-  .vote-cta{margin-top:14px;font-size:.96rem}
-  .vote-inline{
-    display:inline-block;font-family:'Bungee',sans-serif;font-size:.62rem;letter-spacing:.06em;
-    color:var(--neon-lime);border:1.5px solid var(--neon-lime);border-radius:999px;padding:2px 9px;
-    vertical-align:middle;
-  }
+  /* ===== FOOTER ===== */
+  footer{text-align:center;margin-top:56px;padding-top:26px;border-top:1px solid var(--glass-border)}
+  footer .doc{font-family:'Special Elite',monospace;font-size:.86rem;color:var(--amber);line-height:1.6;max-width:620px;margin:0 auto 14px}
+  footer .meta{font-size:.74rem;color:var(--muted);font-family:'Special Elite',monospace;letter-spacing:.05em}
+  footer a{color:var(--neon-cyan);text-decoration:none}
+  footer a:hover{color:var(--amber)}
 
-  /* vote bar = attached footer of each tile (sibling of the link, so clicks never navigate) */
-  .votebar{
-    display:flex;align-items:center;gap:12px;
-    padding:16px 26px;
-    background:var(--glass);border:1px solid var(--glass-border);border-top:1px dashed var(--glass-border);
-    border-radius:0 0 22px 22px;backdrop-filter:blur(18px);
+  @media(max-width:640px){
+    .roads{grid-template-columns:1fr}
+    .story{grid-template-columns:1fr;gap:8px}
+    .rank{text-align:left;padding-top:0}
+    .topbar{justify-content:center;text-align:center}
   }
-  .game-wrap .votebar{padding:16px 34px}
-  .card-wrap:hover .votebar{border-color:transparent;box-shadow:0 20px 50px rgba(0,0,0,.45),0 0 30px var(--c2)}
-  .vote-btn{
-    font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
-    color:#0a0118;background:var(--c2);border:none;border-radius:999px;
-    padding:10px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
-    box-shadow:0 0 0 rgba(0,0,0,0);
-    transition:transform .15s,box-shadow .2s,opacity .2s,filter .2s;
-  }
-  .vote-btn .arrow{font-size:.9rem;line-height:1}
-  /* glow on hover so it's obvious it's clickable — even when hovering the whole tile */
-  .vote-btn:hover,.card-wrap:hover .vote-btn:not(.voted){
-    transform:translateY(-2px);filter:brightness(1.08);
-    box-shadow:0 6px 22px var(--c2),0 0 14px var(--c2);
-  }
-  .vote-btn:active{transform:translateY(0)}
-  .vote-btn.voted{background:transparent;border:1.5px solid var(--neon-lime);color:var(--neon-lime);cursor:default}
-  .vote-btn.voted:hover{transform:none;box-shadow:none}
-  .vote-count{font-family:'Outfit',sans-serif;font-weight:800;font-size:1.25rem;color:var(--text);min-width:28px}
-  .vote-count .lbl{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.78rem;color:var(--muted);margin-left:5px}
-  .vote-flash{color:var(--neon-lime)!important;transition:color .4s}
-
-  /* floating soundtrack toggle */
-  .soundtrack{
-    position:fixed;right:18px;bottom:18px;z-index:50;
-    display:inline-flex;align-items:center;gap:9px;cursor:pointer;
-    font-family:'Bungee',sans-serif;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--neon-cyan);background:rgba(10,1,24,.72);border:1.5px solid var(--neon-cyan);
-    border-radius:999px;padding:11px 18px;backdrop-filter:blur(10px);
-    box-shadow:0 0 18px rgba(0,240,255,.25);
-    transition:transform .15s,box-shadow .2s,color .2s,border-color .2s;
-  }
-  .soundtrack:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(0,240,255,.5)}
-  .soundtrack .eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
-  .soundtrack .eq i{width:3px;background:var(--neon-cyan);border-radius:2px;height:4px}
-  /* animate the bars only while playing */
-  .soundtrack.playing{color:var(--neon-lime);border-color:var(--neon-lime);box-shadow:0 0 22px rgba(198,255,0,.4)}
-  .soundtrack.playing .eq i{background:var(--neon-lime);animation:eq .9s ease-in-out infinite}
-  .soundtrack.playing .eq i:nth-child(2){animation-delay:.18s}
-  .soundtrack.playing .eq i:nth-child(3){animation-delay:.36s}
-  .soundtrack.playing .eq i:nth-child(4){animation-delay:.54s}
-  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
-  @media(max-width:600px){.soundtrack{font-size:.58rem;padding:9px 14px;right:12px;bottom:12px}}
-
-  footer{
-    margin-top:64px;text-align:center;padding-top:30px;border-top:1px solid var(--glass-border);
-  }
-  footer a{color:var(--neon-lime);text-decoration:none;font-weight:700}
-  footer a:hover{text-decoration:underline}
-  .mb{
-    display:inline-flex;align-items:center;gap:10px;font-family:'Bungee',sans-serif;
-    font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
-    padding:12px 22px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-border);
-    backdrop-filter:blur(10px);
-  }
-  .mb .heart{color:var(--neon-pink)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <span class="kicker">Meatbag Made · Help Us Pick What Ships</span>
-    <h1>The Gridiron<br>Gazette</h1>
-    <p class="sub">Six product mockups + one geo game. Three briefs, two builds each — an <b>app</b> and a <b>newsletter</b> — plus a tap-the-globe trivia game. Fantasy football for people who'd rather win than grind.</p>
-    <p class="sub vote-cta"><b>You decide what we build next.</b> Tap a tile to open the mockup — then hit <span class="vote-inline">▲ Vote</span> on the ones you'd actually use. Tallies are live, one vote per demo per device.</p>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a class="brandmark" href="index.html" style="text-decoration:none">
+      <img src="TGGlogo.png" alt="The Gridiron Gazette">
+      <span class="bn">The Gridiron Gazette<small>Doc's Daily Trail Report</small></span>
+    </a>
+    <nav class="nav">
+      <a href="#news">Today's Wire</a>
+      <a href="briefs/">The Briefs · Vote</a>
+      <a class="game" href="demo/geo-game.html">Saddle Up the Game ▸</a>
+    </nav>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <span class="kicker">Meatbag Made · Fresh Off The Wire Daily</span>
+    <h1>The <span class="glow">Gridiron</span><br>Gazette</h1>
+    <p class="doc-howdy">
+      Well howdy, pardner. Name's <b>Doc</b>, and this here's the only news stand
+      on the Gridiron Trail that tells you what the day's headlines actually mean
+      for <b>your roster</b>. We hunt the draft-day value, dig up the diamond in the
+      rough, and aim to have you holdin' the trophy come December — with your
+      leaguemates ridin' home busted and ashamed.
+    </p>
+    <p class="doc-sign">— Doc, proprietor · saddle up and read on ▼</p>
   </header>
 
-  <div class="section-label">Brief 1 · The Sunday Morning Brief</div>
-  <div class="grid">
-    <div class="card-wrap t-brief1">
-      <a class="card t-brief1" href="demo/brief1-app.html">
-      <span class="badge">App</span>
-      <h3>The Sunday Drop</h3>
-      <p>Your whole week, decided before coffee. Inactives, the one start/sit we'd flip, and the waiver pickup that actually fits your roster — then fire it to the group chat.</p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="sunday-drop">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
+  <!-- NEWS BOARD -->
+  <section id="news">
+    <div class="board-head">
+      <div>
+        <div class="board-title">Three Off The Wire</div>
+        <div class="board-sub">The day's biggest news — and what it means for your roster</div>
       </div>
+      <div class="board-sub">Last sourced: <span id="updated">loading…</span></div>
     </div>
-    <div class="card-wrap t-brief1">
-      <a class="card t-brief1" href="demo/brief1-newsletter.html">
-      <span class="badge alt">Newsletter</span>
-      <h3>The 9AM Brief</h3>
-      <p>A 60-second Sunday email. No links, no tables. Plus the debut column: <b>"Fantasy for Newbs."</b></p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="9am-brief">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
-      </div>
+    <div class="news-grid" id="newsGrid">
+      <div class="loading">Doc's ridin' back from the telegraph office with today's wire…</div>
     </div>
-  </div>
+  </section>
 
-  <div class="section-label">Brief 2 · Coach in Your Pocket</div>
-  <div class="grid">
-    <div class="card-wrap t-brief2">
-      <a class="card t-brief2" href="demo/brief2-app.html">
-      <span class="badge">App</span>
-      <h3>Coach — Chat</h3>
-      <p>Text it anything. "Hall or Pollard?" gets a confident, league-aware answer in five seconds. One tap to set your whole lineup.</p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="coach-chat">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
-      </div>
-    </div>
-    <div class="card-wrap t-brief2">
-      <a class="card t-brief2" href="demo/brief2-newsletter.html">
-      <span class="badge alt">Newsletter</span>
-      <h3>Coach's Notebook</h3>
-      <p>A weekly digest of every nudge the Coach sent — the saves, the dodged bullets, the calls that won your week.</p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="coachs-notebook">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-label">Brief 3 · League Drama Engine</div>
-  <div class="grid">
-    <div class="card-wrap t-brief3">
-      <a class="card t-brief3" href="demo/brief3-app.html">
-      <span class="badge">App</span>
-      <h3>The League Press</h3>
-      <p>Power rankings that roast. Weekly awards. Disaster of the Week. Your league's own private tabloid — share cards built in.</p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="league-press">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
-      </div>
-    </div>
-    <div class="card-wrap t-brief3">
-      <a class="card t-brief3" href="demo/brief3-newsletter.html">
-      <span class="badge alt">Newsletter</span>
-      <h3>The Tuesday Dispatch</h3>
-      <p>The Athletic, but for your league. Matchup recaps with attitude, delivered every Tuesday morning.</p>
-      <span class="go">Open mockup</span></a>
-      <div class="votebar" data-vote="tuesday-dispatch">
-        <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-        <span class="vote-count">…<span class="lbl">votes</span></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-label">Bonus · Geo Game</div>
-  <div class="grid">
-    <div class="card-wrap t-game game-wrap">
-      <a class="card t-game game-card" href="demo/geo-game.html">
-      <div class="globe">🌍</div>
-      <div class="gtxt">
-        <span class="badge">Play</span>
-        <h3>Where in the World is Chargers, San Diego?</h3>
-        <p>Tap the globe to answer. "Where did Drew Bledsoe go to college?" Classic WITWICS vibes meets pro football trivia. By The Gridiron Gazette.</p>
-        <span class="go">Launch the game</span></div>
+  <!-- TWO ROADS -->
+  <div class="roads">
+    <a class="road briefs" href="briefs/">
+      <span class="big">🗳️</span>
+      <h4>The Briefs</h4>
+      <p>Six product mockups, three briefs — an app and a newsletter each.
+         You decide what we build next. Stake your vote, pardner.</p>
+      <span class="go">Head to the voting floor ▸</span>
     </a>
-      <div class="votebar" data-vote="geo-game">
-          <button class="vote-btn" type="button"><span class="arrow">▲</span> Vote</button>
-          <span class="vote-count">…<span class="lbl">votes</span></span>
-        </div>
-    </div>
+    <a class="road game" href="demo/geo-game.html">
+      <span class="big">🌎</span>
+      <h4>The Game</h4>
+      <p>Where in the world is that wandering franchise? Tap the globe,
+         beat the clock, and prove you know your territory.</p>
+      <span class="go">Saddle up and play ▸</span>
+    </a>
   </div>
 
+  <!-- FOOTER -->
   <footer>
-    <a class="mb" href="https://meatbagmade.com" target="_blank" rel="noopener">
-      <span class="heart">◆</span> Meatbag&nbsp;Made
-    </a>
+    <p class="doc">"A fella who reads the wire before the saloon does
+      strikes gold while everybody else is still arguin' over ADP."<br>— Doc</p>
+    <p class="meta">
+      The Gridiron Gazette · a <a href="https://meatbagmade.com">Meatbag Made</a> joint ·
+      news refreshed daily ~10AM off the wire
+    </p>
   </footer>
+
 </div>
 
-<!-- soundtrack: home page only. Filename has spaces -> URL-encoded src. -->
-<audio id="track" loop preload="auto" src="just%20like%20summer%20cover.mp3"></audio>
-<button class="soundtrack" id="soundtrack" type="button" aria-label="Toggle soundtrack" aria-pressed="false">
-  <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-  <span id="soundtrackLabel">Soundtrack</span>
-</button>
-
 <script>
-(function(){
-  // ---- Soundtrack toggle ----
-  // Browsers block autoplay-with-sound until a user gesture, so we can't truly
-  // play "on load". We try to start on the very first interaction anywhere on the
-  // page (the closest legal thing to autoplay); the button also toggles manually.
-  const audio = document.getElementById("track");
-  const btn   = document.getElementById("soundtrack");
-  const label = document.getElementById("soundtrackLabel");
-  let userPaused = false;  // becomes true only if the user explicitly pauses
+  // Pull today's three trending stories from news.json (rewritten daily ~10AM).
+  const grid = document.getElementById('newsGrid');
+  const updated = document.getElementById('updated');
 
-  function reflect(){
-    const playing = !audio.paused;
-    btn.classList.toggle("playing", playing);
-    btn.setAttribute("aria-pressed", playing ? "true" : "false");
-    label.textContent = playing ? "Playing" : "Soundtrack";
-  }
-  audio.addEventListener("play", reflect);
-  audio.addEventListener("pause", reflect);
+  function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-  function play(){ audio.play().then(reflect).catch(()=>{}); }
-
-  btn.addEventListener("click", () => {
-    if(audio.paused){ userPaused = false; play(); }
-    else { userPaused = true; audio.pause(); }
-  });
-
-  // attempt autoplay on the first user gesture (once), unless they've paused it
-  function kick(){
-    if(!userPaused && audio.paused) play();
-    window.removeEventListener("pointerdown", kick);
-    window.removeEventListener("keydown", kick);
-  }
-  window.addEventListener("pointerdown", kick);
-  window.addEventListener("keydown", kick);
-})();
-</script>
-
-<script>
-(function(){
-  // Shared vote counters via Abacus (free, no-signup counting API).
-  // GET /get/{ns}/{key}  -> {"value":N}   (read, does not increment)
-  // GET /hit/{ns}/{key}  -> {"value":N}   (increment by 1, returns new value)
-  // Namespace keeps all our demo keys grouped + isolated from other users of the API.
-  const API = "https://abacus.jasoncameron.dev";
-  const NS  = "tgg-demo-reel-v1";
-  const VOTED_KEY = "tgg_voted_demos";   // localStorage: which demos this device voted on
-  const LOCAL_KEY = "tgg_local_votes";   // localStorage: offline fallback tallies
-
-  const fmt = n => (n>=1000 ? (n/1000).toFixed(n%1000>=100?1:0)+"k" : String(n));
-  const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)||"{}"); } catch(e){ return {}; } };
-  const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
-
-  async function api(path){
-    // 4s timeout so a slow/blocked API never hangs the UI
-    const ctrl = new AbortController();
-    const t = setTimeout(()=>ctrl.abort(), 4000);
-    try {
-      const r = await fetch(API+path, {signal:ctrl.signal});
-      clearTimeout(t);
-      if(!r.ok) throw new Error("status "+r.status);
-      const j = await r.json();
-      if(typeof j.value !== "number") throw new Error("bad shape");
-      return j.value;
-    } catch(e){ clearTimeout(t); return null; }
-  }
-
-  const voted = lsGet(VOTED_KEY);
-
-  document.querySelectorAll(".votebar").forEach(bar => {
-    const id    = bar.getAttribute("data-vote");
-    const btn   = bar.querySelector(".vote-btn");
-    const count = bar.querySelector(".vote-count");
-    const lbl   = count.querySelector(".lbl");
-
-    const setCount = n => { count.firstChild.textContent = fmt(n)+" "; };
-    const markVoted = () => { btn.classList.add("voted"); btn.innerHTML = '<span class="arrow">✓</span> Voted'; };
-
-    // initial load: read shared count (fall back to local tally if API unreachable)
-    api("/get/"+NS+"/"+id).then(v => {
-      if(v===null){ const loc = lsGet(LOCAL_KEY); v = loc[id]||0; }
-      setCount(v);
+  fetch('news.json?v=' + Date.now())
+    .then(r => { if(!r.ok) throw new Error('no wire'); return r.json(); })
+    .then(data => {
+      updated.textContent = data.updated_label || data.updated || '—';
+      const stories = (data.stories || []).slice(0,3);
+      if(!stories.length){ throw new Error('empty wire'); }
+      grid.innerHTML = stories.map((s,i) => `
+        <article class="story">
+          <div class="rank">${esc(s.rank || (i+1))}</div>
+          <div>
+            <h3>${esc(s.headline)}</h3>
+            <p>${esc(s.read)}</p>
+            <a class="src" href="${esc(s.url)}" target="_blank" rel="noopener">
+              <span class="arrow">▸</span> heard it on the wire at ${esc(s.source)}
+            </a>
+          </div>
+        </article>`).join('');
+    })
+    .catch(() => {
+      updated.textContent = "wire's down";
+      grid.innerHTML = `<div class="errbox">Telegraph's actin' up, pardner — Doc'll have
+        today's wire posted shortly. Check back after the 10 o'clock ride.</div>`;
     });
-    if(voted[id]) markVoted();
-
-    btn.addEventListener("click", async (e) => {
-      // the card is an <a>; stop the click from opening the mockup or following the link
-      e.preventDefault(); e.stopPropagation();
-      if(btn.classList.contains("voted")) return;
-
-      markVoted();
-      voted[id] = true; lsSet(VOTED_KEY, voted);
-
-      const v = await api("/hit/"+NS+"/"+id);
-      if(v!==null){
-        setCount(v);
-      } else {
-        // offline fallback: bump a local tally so the number still moves
-        const loc = lsGet(LOCAL_KEY); loc[id] = (loc[id]||0)+1; lsSet(LOCAL_KEY, loc);
-        setCount(loc[id]);
-      }
-      count.classList.add("vote-flash");
-      setTimeout(()=>count.classList.remove("vote-flash"), 600);
-    });
-  });
-})();
 </script>
 </body>
 </html>
