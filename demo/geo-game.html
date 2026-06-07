@@ -628,19 +628,24 @@ function visible(lnglat){
 
 /* ---- interaction: drag to rotate, click to drop pin ---- */
 let dragged=false;
-// Mouse-only drag (D3). Touch is handled by the unified touch handler below so
-// that one finger = rotate and two fingers = pinch-zoom without the two fighting.
-const drag=d3.drag()
-  .filter(ev=>ev.pointerType!=="touch" && !ev.button)
-  .on("start",()=>{dragged=false;})
-  .on("drag",(ev)=>{
+// Mouse-only rotate via native handlers. We deliberately do NOT use d3.drag()
+// here: on iOS Safari d3.drag attaches its own touch listeners to the SVG and
+// swallows the gesture before our unified touch handler (below) can see it,
+// which broke pinch-zoom on iPhone. Touch is owned entirely by that handler.
+(function(){
+  const node=svg.node();
+  let down=false;
+  node.addEventListener("mousedown",(ev)=>{ down=true; dragged=false; ev.preventDefault(); });
+  window.addEventListener("mousemove",(ev)=>{
+    if(!down) return;
     dragged=true;
     const r=projection.rotate();
     const k=70/scale;
-    projection.rotate([r[0]+ev.dx*k, r[1]-ev.dy*k, r[2]]);
+    projection.rotate([r[0]+ev.movementX*k, r[1]-ev.movementY*k, r[2]]);
     redraw();
   });
-svg.call(drag);
+  window.addEventListener("mouseup",()=>{ down=false; });
+})();
 svg.on("click",(ev)=>{
   if(dragged||locked||answered) return;
   const [mx,my]=d3.pointer(ev);
@@ -661,7 +666,8 @@ function spinHome(){projection.rotate([95,-38]);scale=205;redraw();}
 
 /* ---- touch interaction: 1 finger = rotate · 2 fingers = pinch-zoom · tap = pin ----
    Self-contained so the gesture stays inside the globe and never zooms the page.
-   (D3 drag above is filtered to mouse only, so the two don't fight on touch.) */
+   This is the ONLY touch listener on the globe (no d3.drag on touch), so the
+   two-finger pinch is never intercepted on iOS Safari. */
 (function(){
   const el=document.getElementById("globe");
   if(!el) return;
