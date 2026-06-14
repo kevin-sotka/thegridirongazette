@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.gridirongazette.pushnews</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/kevinsotka/Meatbag_Labs/thegridirongazette/scripts/push-news.sh</string>
+    </array>
+
+    <!-- Run daily at 10:15 AM local time, a few minutes after the sandbox
+         task (~10:01 AM) has refreshed news.json. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>15</integer>
+    </dict>
+
+    <!-- If the Mac was asleep at 10:15, run once on next wake. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/kevinsotka/Meatbag_Labs/thegridirongazette/scripts/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/kevinsotka/Meatbag_Labs/thegridirongazette/scripts/launchd.err.log</string>
+</dict>
+</plist>

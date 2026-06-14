@@ -14,3 +14,10 @@ cache/
 
 # Contains live IONOS database credentials — never commit
 signup_waitlist.php
+
+# Local auto-push tooling (runs on Mac, not committed). Logs are noisy and
+# we never want a stray token file to slip into a commit.
+scripts/*.log
+scripts/token*
+scripts/*.secret
+.env
