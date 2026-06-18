@@ -1,27 +1,9 @@
 {
-  "updated": "2026-06-17",
-  "updated_label": "Wednesday, June 17, 2026 - sourced 10:00 AM",
+  "updated": "2026-06-18",
+  "updated_label": "Thursday, June 18, 2026 · sourced 10:00 AM",
   "stories": [
-    {
-      "rank": 1,
-      "headline": "Jeremiyah Love Stakes His Claim in the Desert",
-      "read": "Hot off the wire, pardner: the Cardinals handed rookie Jeremiyah Love the No. 3 pick and look fixin' to hand him the reins right quick. The chatter's got him as a high-end No. 2 back come the land grab, end of the second or top of the third -- and a rookie that touches the ball that much pays the rent regardless of polish. Watch the money patch close to paydirt, 'cause Conner and Allgeier might steal a goal-line carry or two early. But this here's a vein worth strikin' before the saloon prices him into Round 1.",
-      "source": "NBC Sports",
-      "url": "https://www.nbcsports.com/fantasy/football/news/2026-arizona-cardinals-fantasy-preview-can-jeremiyah-love-hit-the-ground-running"
-    },
-    {
-      "rank": 2,
-      "headline": "DeVonta Smith Inherits the Whole Philly Creek",
-      "read": "With A.J. Brown shipped east, ol' Batman is the lone No. 1 on the range in Philadelphia. Brown left behind a near-28-percent cut of the throws and a mountain of air yards, and most of that haul rides straight to Smith -- folks already nudgin' his stock up toward the WR1 mix. The man's been a locked-in stud every time Brown's been laid up, so the volume ain't a guess. Go pan that creek now while the saloon still has him slotted as a mid-round WR2.",
-      "source": "FantasyLife",
-      "url": "https://www.fantasylife.com/articles/fantasy/devonta-smith-fantasy-football-value-for-2026-after-aj-brown-tra"
-    },
-    {
-      "rank": 3,
-      "headline": "Two Tight Ends, One Saddle -- Giants Room Gets Crowded",
-      "read": "John Harbaugh went and handed Isaiah Likely forty million to ride alongside Theo Johnson, and now he's braggin' there ain't a better tight end room in the league. That's mighty fine for the Giants -- and mighty poor for your lineup, pardner. When two good critters split the same haul, neither one carves out a steady week-to-week stake. Don't go reachin' for Johnson's breakout on that crowded ranch; let some other fella pay full price for the headache.",
-      "source": "CBS Sports",
-      "url": "https://www.cbssports.com/fantasy/football/news/giants-add-isaiah-likely-athletic-te-brings-mismatch-potential-but-uncertain-fantasy-upside-in-new-york/"
-    }
+    { "rank": 1, "headline": "Rashee Rice walks free, dodges the noose", "read": "Well pardner, the Chiefs' Rashee Rice stepped out of that Dallas jail after his 30-day stint, and the league's shown no appetite to hang another suspension on him. That means a full slate of games with Mahomes slingin' it his way. His knee's mendin' and Andy Reid says he reports to camp on time, so the dry well everybody feared just turned back into a gushin' vein. If your saloon's still pricin' him like damaged goods, go stake that claim before the herd wises up.", "source": "NFL.com", "url": "https://www.nfl.com/news/chiefs-wr-rashee-rice-released-30-day-jail-stint-car-crash-probation-violation" },
+    { "rank": 2, "headline": "A.J. Brown rides east, leaves a creek wide open in Philly", "read": "The Eagles shipped A.J. Brown out and now there's a whole pile of throws left layin' in the dirt — somethin' like 131 vacated targets after Marquise Brown lit out too. Brown's a No. 1 again up in New England, but on a greener offense, so temper that ceiling, pardner. The real strike is every remaining Philly pass-catcher just got a fatter cut of the throws. Go pan that creek before your leaguemates even notice the gold.", "source": "Rotoworld / NBC Sports", "url": "https://www.nbcsports.com/fantasy/football/news/2026-rotoworld-fantasy-football-team-previews-hub" },
+    { "rank": 3, "headline": "Pickens saddles up in Dallas, no holdout in sight", "read": "George Pickens reported to Cowboys minicamp on his $27.3 million tag and told the wire he ain't holdin' out — football first, contract later. That's a clean green light: a downfield burner gettin' a full run of work with Dak handin' him the reins. No camp drama means no fog over his value come the great land grab. Lock in your read now while folks are still spooked by the tag talk.", "source": "ESPN", "url": "https://www.espn.com/nfl/story/_/id/49086294/ok-franchise-tag-george-pickens-cowboys-minicamp" }
   ]
 }
