@@ -1,27 +1,27 @@
 {
-  "updated": "2026-09-14",
-  "updated_label": "Monday, September 14, 2026 · sourced 10:00 AM",
+  "updated": "2026-09-15",
+  "updated_label": "Tuesday, September 15, 2026 · sourced 10:00 AM",
   "stories": [
     {
       "rank": 1,
-      "headline": "The Law Rides Into Green Bay: Jacobs Banished to the Sidelines",
-      "read": "Well pardner, the league just put Josh Jacobs on the commissioner's exempt list, and that bell-cow can't so much as touch a practice field till further notice. That's your RB1 turned into a hitching post overnight, and the fellas who slept through the news are still carrying dead weight on their roster. MarShawn Lloyd just inherited the whole herd in Green Bay, and he's sitting there unclaimed on the open range right now, free for whoever stakes it first. Go pan that creek before your leaguemates wake up.",
-      "source": "ESPN",
-      "url": "https://www.espn.com/nfl/story/_/id/49774523/packers-rb-josh-jacobs-placed-commission-exempt-list"
-    },
-    {
-      "rank": 2,
-      "headline": "A.J. Brown Laid Up Six Weeks — Patriots Pass-Catchers Just Got Richer",
-      "read": "Brown took a bad spill on a third-down grab up in New England, and the word from the wire says a high ankle sprain lands him on injured reserve for six weeks minimum, no surgery needed. That's a hard blow if he's anchoring your receiving corps, but don't just cut bait, every other Patriot who runs a route just picked up a bigger cut of the throws while he's laid up. Somebody in that offense is fixin' to strike gold these next six weeks, and the smart money starts diggin' now, not in Week 8 when he's back.",
+      "headline": "Brown Down for Six: Patriots' Diamond Mine Just Went Bust",
+      "read": "Pardner, the Patriots' big prize outta Philly caught his boot between the turf and a Seahawk in Week 1, and now he's headed to injured reserve with a high ankle sprain, out a minimum of four weeks, with insiders callin' it closer to six. That's Brown gone through the Steelers, Jags, Bills, Raiders, and Jets tilts. Every other fella catchin' passes in New England just struck a vein nobody else has found. Go pan that creek before your leaguemates do.",
       "source": "NFL.com",
       "url": "https://www.nfl.com/news/patriots-wr-aj-brown-out-six-weeks-high-ankle-sprain"
     },
     {
+      "rank": 2,
+      "headline": "Murray Laid Up, Wentz Rides Shotgun for Jefferson's Outfit",
+      "read": "Kyler Murray took a hard lick against Green Bay and landed square in concussion protocol, and Minnesota ain't bettin' the ranch on him clearin' it by Sunday. Carson Wentz stepped in and threw three touchdowns in a 22 point fourth quarter rally, so don't go burnin' your waiver bullets in a panic. Streamers, saddle up Wentz for a cheap ride behind Justin Jefferson's still loaded wagon, but keep one eye on the practice report all week.",
+      "source": "NBC Sports",
+      "url": "https://www.nbcsports.com/fantasy/football/player-news/2026-09-14/rap-vikings-unsure-if-kyler-will-play-week-2"
+    },
+    {
       "rank": 3,
-      "headline": "Bowers Takes a Knee Trim, Mayer Rides Into the Money Patch",
-      "read": "Raiders' big tight end went under the knife for a meniscus trim, and he's out a game or two while it heals, no long-term worry but a real hole in your lineup this week. Michael Mayer steps into the starter's saddle in the meantime, and while he hasn't hit paydirt much with Bowers healthy, an every-down role in the money patch makes him a legit streaming play for the next couple Sundays. Rent that horse for a ride or two, then hand the reins right back once Bowers is fit.",
-      "source": "SI Onsi",
-      "url": "https://www.si.com/onsi/fantasy/injuries/fantasy-football-outlook-for-michael-mayer-after-brock-bowers-injury"
+      "headline": "Darnold's Nursin' a Busted Wing, Lock Takes the Reins in Seattle",
+      "read": "Sam Darnold's dinged up glute is keepin' him out at Arizona this week, but the docs say it ain't the hip trouble first feared, so don't count him out long. Drew Lock already proved he can ride: sixteen of twenty two for 187 yards, a score, and a win over the Patriots when he spelled Darnold in Week 1. He's cheap gold for a one week fill in at QB, and every Seahawks pass catcher just got a nice little bump on the open range.",
+      "source": "NFL.com",
+      "url": "https://www.nfl.com/news/sam-darnold-hip-injury-miss-seahawks-week-2-game-cardinals"
     }
   ]
 }
